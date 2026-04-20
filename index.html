@@ -1,0 +1,2349 @@
+﻿<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>De Skill-architectuur â€” e-office</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DESIGN TOKENS
+============================================================ */
+:root {
+  --bg: #0a0a0f;
+  --bg-grad: radial-gradient(ellipse at top, #12121a 0%, #0a0a0f 50%);
+  --surface-1: #14141c;
+  --surface-2: #1a1a24;
+  --surface-3: #22222e;
+  --border: #2a2a36;
+  --border-subtle: #1f1f2a;
+  --text: #e5e7eb;
+  --text-2: #9ca3af;
+  --text-3: #6b7280;
+  --amber: #f59e0b;
+  --amber-dim: #b8720a;
+  --amber-glow: rgba(245, 158, 11, 0.2);
+  --blue: #3b82f6;
+  --blue-dim: #1e40af;
+  --blue-glow: rgba(59, 130, 246, 0.2);
+  --green: #10b981;
+  --green-dim: #047857;
+  --green-glow: rgba(16, 185, 129, 0.2);
+  --purple: #a78bfa;
+  --purple-dim: #6d28d9;
+  --purple-glow: rgba(167, 139, 250, 0.2);
+  --red: #ef4444;
+  --red-glow: rgba(239, 68, 68, 0.2);
+  --t-fast: 200ms ease-out;
+  --t-med: 400ms ease-out;
+  --t-slow: 600ms ease-out;
+  --t-slower: 900ms ease-out;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+body {
+  background: var(--bg-grad);
+  min-height: 100vh;
+}
+
+h1, h2, h3 { font-family: 'Fraunces', serif; font-weight: 500; }
+code, .mono { font-family: 'JetBrains Mono', monospace; }
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: inherit;
+}
+
+/* ============================================================
+   MOBILE GUARD
+============================================================ */
+.mobile-guard {
+  display: none;
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--text-2);
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 20px;
+  line-height: 1.5;
+}
+@media (max-width: 1100px) {
+  #app { display: none; }
+  .mobile-guard { display: flex; min-height: 100vh; align-items: center; justify-content: center; }
+}
+
+/* ============================================================
+   APP SHELL
+============================================================ */
+#app {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 32px 48px;
+  min-height: 100vh;
+  position: relative;
+}
+
+.scene {
+  display: none;
+  animation: sceneIn 600ms ease-out;
+}
+.scene.active { display: block; }
+
+@keyframes sceneIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   HUB
+============================================================ */
+.hub-header {
+  text-align: center;
+  margin: 48px 0 56px;
+}
+.hub-title {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 72px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 20px;
+}
+.hub-subtitle {
+  font-size: 17px;
+  color: var(--text-2);
+  max-width: 520px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+.hub-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 20px;
+  margin-bottom: 56px;
+}
+
+.scenario-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 32px 28px;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all var(--t-med);
+  cursor: pointer;
+  position: relative;
+  text-align: left;
+}
+.scenario-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--amber);
+  background: var(--surface-2);
+}
+.scenario-card:hover .sc-number { color: var(--amber); }
+
+.sc-number {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: 56px;
+  line-height: 1;
+  color: var(--amber-dim);
+  transition: color var(--t-med);
+  margin-bottom: 20px;
+}
+.sc-title {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.25;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.sc-desc {
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+.sc-layers {
+  display: flex;
+  gap: 4px;
+  margin-top: auto;
+}
+.sc-layer-bar {
+  height: 3px;
+  flex: 1;
+  border-radius: 2px;
+  background: var(--border);
+}
+.sc-layer-bar.amber { background: var(--amber); }
+.sc-layer-bar.blue { background: var(--blue); }
+.sc-layer-bar.green { background: var(--green); }
+.sc-layer-bar.purple { background: var(--purple); }
+
+.scenario-card.placeholder {
+  border: 1px dashed var(--border);
+  background: transparent;
+  cursor: default;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+.scenario-card.placeholder:hover { transform: none; border-color: var(--border); background: transparent; }
+.placeholder-text {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  color: var(--text-3);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.hub-footer {
+  text-align: center;
+  color: var(--text-3);
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  margin-top: 32px;
+}
+
+/* ============================================================
+   SCENE CHROME (header + nav)
+============================================================ */
+.scene-chrome {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0 24px;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 32px;
+}
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-2);
+  font-size: 13px;
+  transition: color var(--t-fast);
+  padding: 6px 10px;
+  border-radius: 4px;
+}
+.back-btn:hover { color: var(--amber); background: rgba(245, 158, 11, 0.05); }
+
+.scene-title {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 20px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.scene-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ctrl-btn {
+  padding: 6px 14px;
+  font-size: 13px;
+  color: var(--text-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  transition: all var(--t-fast);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.ctrl-btn:hover:not(:disabled) {
+  color: var(--text);
+  border-color: var(--amber);
+}
+.ctrl-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.ctrl-btn.primary {
+  background: var(--amber);
+  color: #1a1300;
+  border-color: var(--amber);
+  font-weight: 500;
+}
+.ctrl-btn.primary:hover:not(:disabled) { background: #fab534; border-color: #fab534; color: #1a1300; }
+
+.step-indicator {
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-3);
+  letter-spacing: 0.05em;
+}
+
+/* ============================================================
+   SCENE LAYOUT
+============================================================ */
+.scene-body {
+  display: grid;
+  gap: 28px;
+  min-height: 600px;
+}
+.scene-body.split-50-50 { grid-template-columns: 1fr 1fr; }
+.scene-body.split-60-40 { grid-template-columns: minmax(0, 3fr) minmax(380px, 2fr); }
+.scene-body.stacked { grid-template-columns: 1fr; }
+
+/* ============================================================
+   ZESLAAGS PANEEL (het anker)
+============================================================ */
+.layer-panel {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 20px 20px 16px;
+  position: relative;
+}
+.layer-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.layer-panel-title {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--text-2);
+  letter-spacing: 0.02em;
+}
+.layer-panel-meta {
+  font-size: 10px;
+  color: var(--text-3);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.layer {
+  position: relative;
+  padding: 10px 14px 10px 20px;
+  margin-bottom: 4px;
+  border-radius: 6px;
+  background: var(--surface-2);
+  border-left: 3px solid transparent;
+  transition: all var(--t-med);
+  opacity: 0.45;
+}
+.layer:last-child { margin-bottom: 0; }
+
+.layer-num {
+  position: absolute;
+  left: 6px;
+  top: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--text-3);
+  letter-spacing: 0.05em;
+}
+.layer-name {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-2);
+  letter-spacing: 0.03em;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.layer-content {
+  font-size: 12px;
+  color: var(--text-3);
+  line-height: 1.45;
+  font-family: 'JetBrains Mono', monospace;
+  min-height: 16px;
+  transition: color var(--t-med);
+}
+
+.layer.eoffice {
+  border-left-color: var(--amber-dim);
+  opacity: 0.55;
+}
+.layer.klant {
+  border-left-color: var(--blue-dim);
+  opacity: 0.55;
+}
+
+.layer.active {
+  opacity: 1;
+  background: var(--surface-3);
+}
+.layer.active .layer-name { color: var(--text); }
+.layer.active .layer-content { color: var(--text-2); }
+
+.layer.active.eoffice {
+  border-left-color: var(--amber);
+  box-shadow: inset 0 0 20px -10px var(--amber-glow), 0 0 0 1px var(--amber-glow);
+}
+.layer.active.klant {
+  border-left-color: var(--blue);
+  box-shadow: inset 0 0 20px -10px var(--blue-glow), 0 0 0 1px var(--blue-glow);
+}
+.layer.active.regie {
+  border-left-color: var(--green);
+  box-shadow: inset 0 0 20px -10px var(--green-glow), 0 0 0 1px var(--green-glow);
+}
+.layer.active.mcp {
+  border-left-color: var(--purple);
+  box-shadow: inset 0 0 20px -10px var(--purple-glow), 0 0 0 1px var(--purple-glow);
+}
+
+/* Pulse dot */
+.pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--t-fast);
+}
+.layer.active .pulse-dot {
+  opacity: 1;
+  animation: pulseDot 1.2s ease-out 2;
+}
+.layer.eoffice .pulse-dot { color: var(--amber); }
+.layer.klant .pulse-dot { color: var(--blue); }
+.layer.regie .pulse-dot { color: var(--green); }
+.layer.mcp .pulse-dot { color: var(--purple); }
+
+@keyframes pulseDot {
+  0% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 currentColor; }
+  70% { transform: scale(1.6); opacity: 0.3; box-shadow: 0 0 0 6px transparent; }
+  100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 transparent; }
+}
+
+/* Connection SVG overlay */
+.layer-connections {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--t-slow);
+}
+.layer-connections.visible { opacity: 1; }
+
+/* ============================================================
+   SCENE 01 â€” Slordige prompt
+============================================================ */
+.s01-panel {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 28px;
+  min-height: 560px;
+  display: flex;
+  flex-direction: column;
+  transition: all var(--t-slow);
+}
+.s01-panel.left { border-color: var(--border-subtle); }
+.s01-panel.right { border-color: rgba(245, 158, 11, 0.15); }
+
+.s01-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.s01-label {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 16px;
+}
+.s01-panel.left .s01-label { color: var(--text-2); }
+.s01-panel.right .s01-label { color: var(--amber); }
+
+.s01-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.s01-badge.cool { background: rgba(156, 163, 175, 0.1); color: var(--text-2); }
+.s01-badge.warm { background: var(--amber-glow); color: var(--amber); }
+
+.s01-components {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 18px;
+  min-height: 130px;
+}
+.skill-component {
+  background: rgba(245, 158, 11, 0.06);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 4px;
+  padding: 10px 12px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: all var(--t-slow);
+}
+.skill-component.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.sc-head {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--amber);
+  margin-bottom: 4px;
+}
+.sc-body {
+  font-size: 11px;
+  color: var(--text-2);
+  line-height: 1.4;
+}
+
+.s01-prompt-wrap {
+  background: #0f0f16;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+.s01-prompt-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-3);
+  letter-spacing: 0.1em;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+.s01-prompt {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  color: var(--text);
+  min-height: 22px;
+}
+.cursor { display: inline-block; width: 7px; background: var(--text-2); animation: blink 1s infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+.s01-receives {
+  font-size: 11px;
+  color: var(--text-3);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 20px;
+  min-height: 16px;
+  opacity: 0;
+  transition: opacity var(--t-slow);
+}
+.s01-receives.visible { opacity: 1; }
+
+.s01-response-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 180px;
+}
+.s01-response-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-3);
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+.s01-response {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text);
+  min-height: 100px;
+  opacity: 0;
+  transition: opacity var(--t-slow);
+}
+.s01-response.visible { opacity: 1; }
+
+.s01-verdict {
+  margin-top: 14px;
+  font-size: 12px;
+  padding: 10px 12px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  opacity: 0;
+  transition: opacity var(--t-slow);
+  line-height: 1.4;
+}
+.s01-verdict.visible { opacity: 1; }
+.s01-verdict.warn { background: rgba(239, 68, 68, 0.08); color: var(--red); border-left: 2px solid var(--red); }
+.s01-verdict.good { background: rgba(16, 185, 129, 0.08); color: var(--green); border-left: 2px solid var(--green); }
+
+.s01-closer {
+  margin-top: 24px;
+  text-align: center;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 18px;
+  color: var(--text-2);
+  opacity: 0;
+  transition: opacity var(--t-slower);
+}
+.s01-closer.visible { opacity: 1; }
+
+/* ============================================================
+   SCENE 02 â€” Ed's dashboard
+============================================================ */
+.ed-hero {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 32px;
+  text-align: center;
+  margin-bottom: 20px;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 24px;
+  color: var(--text-2);
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 600ms ease-out;
+}
+.ed-hero.visible { opacity: 1; transform: translateY(0); }
+.ed-hero.faded { opacity: 0; transform: translateY(-4px); margin-bottom: 0; padding: 0; min-height: 0; height: 0; overflow: hidden; border: none; }
+
+.ed-hero-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--amber);
+  display: inline-block;
+  margin-right: 12px;
+  vertical-align: middle;
+  opacity: 0.6;
+}
+
+.dashboard {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 24px 28px 28px;
+}
+.dash-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.dash-greet {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 22px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.dash-greet em { color: var(--amber); font-style: normal; }
+.dash-sub {
+  font-size: 12px;
+  color: var(--text-3);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.05em;
+}
+.dash-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-3);
+  text-align: right;
+}
+.dash-time .time-val { color: var(--text-2); font-size: 14px; }
+
+.dash-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.dash-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--border);
+  border-radius: 6px;
+  padding: 16px 20px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: all var(--t-slow);
+}
+.dash-card.visible { opacity: 1; transform: translateY(0); }
+
+.dash-card.green { border-left-color: var(--green); }
+.dash-card.amber { border-left-color: var(--amber); }
+.dash-card.red { border-left-color: var(--red); }
+.dash-card.context { border-left-color: var(--text-3); background: var(--surface-1); }
+
+.dc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.dc-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.dash-card.green .dc-tag { color: var(--green); }
+.dash-card.amber .dc-tag { color: var(--amber); }
+.dash-card.red .dc-tag { color: var(--red); }
+.dc-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-3);
+}
+.dc-body {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+.dc-action {
+  display: inline-block;
+  font-size: 12px;
+  color: var(--text-2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 3px 10px;
+  transition: all var(--t-fast);
+}
+.dc-action:hover { color: var(--amber); border-color: var(--amber); }
+
+.s02-closer {
+  margin-top: 22px;
+  padding: 18px 22px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-left: 2px solid var(--amber);
+  border-radius: 4px;
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.6;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: all var(--t-slower);
+}
+.s02-closer.visible { opacity: 1; transform: translateY(0); }
+.s02-closer em { font-family: 'Fraunces', serif; font-style: italic; color: var(--text); font-size: 15px; }
+
+/* ============================================================
+   SCENE 03 â€” Chris' rapport
+============================================================ */
+.motd-envelope {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.motd-mail-bar {
+  background: var(--surface-2);
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border-subtle);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-3);
+  display: flex;
+  justify-content: space-between;
+}
+
+.motd-body {
+  padding: 28px 32px 32px;
+}
+.motd-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.motd-title {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.motd-sub {
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-3);
+  letter-spacing: 0.05em;
+}
+
+.motd-block {
+  margin-bottom: 18px;
+  padding: 16px 18px;
+  background: var(--surface-2);
+  border-left: 2px solid var(--border);
+  border-radius: 4px;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: all var(--t-slow);
+}
+.motd-block.visible { opacity: 1; transform: translateX(0); }
+
+.motd-block-label {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--amber);
+  margin-bottom: 6px;
+  letter-spacing: 0.02em;
+}
+.motd-block-body {
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.6;
+}
+
+.motd-decision {
+  margin-top: 24px;
+  padding: 20px 22px;
+  background: rgba(245, 158, 11, 0.06);
+  border: 1px solid var(--amber-dim);
+  border-radius: 6px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: all var(--t-slower);
+}
+.motd-decision.visible { opacity: 1; transform: translateY(0); }
+.motd-decision-label {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 8px;
+}
+.motd-decision-body {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.55;
+}
+.motd-decision-body strong { color: var(--amber); font-weight: 500; }
+
+.s03-closer {
+  margin-top: 22px;
+  padding: 18px 22px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.6;
+  opacity: 0;
+  transition: opacity var(--t-slower);
+}
+.s03-closer.visible { opacity: 1; }
+.s03-closer em { font-family: 'Fraunces', serif; font-style: italic; color: var(--text); }
+
+/* ============================================================
+   SCENE 04 â€” Mission control
+============================================================ */
+.mission-control {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 22px 24px 24px;
+}
+.mc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.mc-title {
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.mc-status {
+  font-size: 12px;
+  color: var(--text-2);
+  font-family: 'JetBrains Mono', monospace;
+}
+.mc-clock {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  color: var(--text);
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  min-width: 160px;
+  text-align: right;
+  transition: color var(--t-fast);
+}
+.mc-clock.highlight { color: var(--amber); }
+
+.mc-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 12px;
+  min-height: 380px;
+}
+
+.mc-quadrant {
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  transition: all var(--t-med);
+  position: relative;
+}
+.mc-quadrant.green { border-color: rgba(16, 185, 129, 0.3); }
+.mc-quadrant.amber {
+  border-color: rgba(245, 158, 11, 0.5);
+  background: rgba(245, 158, 11, 0.05);
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.15);
+}
+.mc-quadrant.red {
+  border-color: rgba(239, 68, 68, 0.5);
+  background: rgba(239, 68, 68, 0.05);
+  box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.15);
+}
+
+.mcq-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.mcq-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  transition: all var(--t-med);
+}
+.mc-quadrant.amber .mcq-dot { background: var(--amber); animation: pulseDot 1.5s ease-in-out infinite; }
+.mc-quadrant.red .mcq-dot { background: var(--red); animation: pulseDot 1s ease-in-out infinite; }
+
+.mcq-name {
+  font-family: 'Fraunces', serif;
+  font-size: 14px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.mcq-activity {
+  font-size: 12px;
+  color: var(--text-2);
+  line-height: 1.45;
+  margin-bottom: auto;
+  min-height: 46px;
+}
+
+.mcq-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-subtle);
+}
+.mcq-beslis {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-3);
+  letter-spacing: 0.05em;
+}
+.mcq-beslis .val { color: var(--text); }
+.mc-quadrant.amber .mcq-beslis .val { color: var(--amber); }
+.mc-quadrant.red .mcq-beslis .val { color: var(--red); }
+.mcq-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-3);
+}
+
+.mc-proposal {
+  margin-top: 16px;
+  padding: 14px 16px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-left: 2px solid var(--green);
+  border-radius: 4px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: all var(--t-slow);
+  min-height: 50px;
+}
+.mc-proposal.visible { opacity: 1; transform: translateY(0); }
+.mc-proposal-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 4px;
+}
+.mc-proposal-body {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.s04-closer {
+  margin-top: 20px;
+  padding: 18px 22px;
+  background: var(--surface-1);
+  border-left: 2px solid var(--amber);
+  border-radius: 4px;
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.6;
+  opacity: 0;
+  transition: opacity var(--t-slower);
+}
+.s04-closer.visible { opacity: 1; }
+.s04-closer em { font-family: 'Fraunces', serif; font-style: italic; color: var(--text); font-size: 15px; }
+
+/* ============================================================
+   SCENE 05 â€” Symfonie
+============================================================ */
+.symphony-hero {
+  text-align: center;
+  margin-bottom: 28px;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 22px;
+  color: var(--text-2);
+  min-height: 28px;
+  opacity: 0;
+  transition: opacity var(--t-slow);
+}
+.symphony-hero.visible { opacity: 1; }
+
+.stakeholder-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.stakeholder {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 14px 12px;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  opacity: 0.25;
+  transform: translateY(6px);
+  transition: all var(--t-slower);
+  position: relative;
+}
+.stakeholder.visible { opacity: 1; transform: translateY(0); }
+
+.stakeholder.klant { border-color: rgba(59, 130, 246, 0.25); }
+.stakeholder.eoffice { border-color: rgba(245, 158, 11, 0.18); }
+
+.sh-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--surface-3);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fraunces', serif;
+  font-size: 13px;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.stakeholder.klant .sh-avatar { border-color: var(--blue); color: var(--blue); }
+
+.sh-name {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+.sh-role {
+  font-size: 10px;
+  color: var(--text-3);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.05em;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+.sh-view {
+  font-size: 11px;
+  color: var(--text-2);
+  line-height: 1.45;
+  flex: 1;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.symphony-closer {
+  margin-top: 24px;
+  text-align: center;
+  opacity: 0;
+  transition: opacity var(--t-slower);
+}
+.symphony-closer.visible { opacity: 1; }
+.symphony-headline {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 36px;
+  color: var(--text);
+  line-height: 1.15;
+  margin-bottom: 14px;
+  letter-spacing: -0.01em;
+}
+.symphony-sub {
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.7;
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+/* Flows (SVG overlay lines in scene 05) */
+.symphony-flows {
+  position: absolute;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+}
+.flow-line {
+  fill: none;
+  stroke: var(--amber);
+  stroke-width: 1;
+  opacity: 0;
+  stroke-dasharray: 4 3;
+  transition: opacity var(--t-slower);
+}
+.flow-line.visible { opacity: 0.35; }
+.flow-line.green { stroke: var(--green); }
+.flow-line.blue { stroke: var(--blue); }
+
+/* ============================================================
+   Pulse sync (scene 05)
+============================================================ */
+.syncpulse {
+  animation: syncPulse 2.4s ease-in-out;
+}
+@keyframes syncPulse {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.3); }
+}
+
+/* ============================================================
+   Utility
+============================================================ */
+.hidden { display: none !important; }
+.fade-in { animation: fadeIn 600ms ease-out forwards; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+</style>
+</head>
+<body>
+
+<div class="mobile-guard">Open deze demo op een laptop voor de volledige ervaring.</div>
+
+<div id="app">
+
+  <!-- ============================================================
+       HUB
+  ============================================================ -->
+  <div id="hub" class="scene active">
+    <div class="hub-header">
+      <h1 class="hub-title">De Skill-architectuur</h1>
+      <p class="hub-subtitle">Vijf scenario's die laten zien waarom dit het fundament wordt van e-office.</p>
+    </div>
+
+    <div class="hub-grid">
+      <button class="scenario-card" data-goto="scene-01">
+        <div class="sc-number">01</div>
+        <div>
+          <div class="sc-title">Slordige prompt Â· Slimme skill</div>
+          <div class="sc-desc">Waarom hetzelfde AI-model compleet andere output geeft afhankelijk van wat je ervoor zet.</div>
+        </div>
+        <div class="sc-layers">
+          <span class="sc-layer-bar"></span>
+          <span class="sc-layer-bar amber"></span>
+          <span class="sc-layer-bar blue"></span>
+          <span class="sc-layer-bar"></span>
+          <span class="sc-layer-bar"></span>
+          <span class="sc-layer-bar purple"></span>
+        </div>
+      </button>
+
+      <button class="scenario-card" data-goto="scene-02">
+        <div class="sc-number">02</div>
+        <div>
+          <div class="sc-title">Ed, maandagochtend 9 uur</div>
+          <div class="sc-desc">Wat Ed ziet als hij zijn laptop opent â€” en welke lagen dit mogelijk maken.</div>
+        </div>
+        <div class="sc-layers">
+          <span class="sc-layer-bar amber"></span>
+          <span class="sc-layer-bar amber"></span>
+          <span class="sc-layer-bar blue"></span>
+          <span class="sc-layer-bar green"></span>
+          <span class="sc-layer-bar green"></span>
+          <span class="sc-layer-bar purple"></span>
+        </div>
+      </button>
+
+      <button class="scenario-card" data-goto="scene-03">
+        <div class="sc-number">03</div>
+        <div>
+          <div class="sc-title">Chris, vrijdag 16 uur</div>
+          <div class="sc-desc">Wat de klant ontvangt â€” en hoe dat rapport tot stand kwam zonder dat iemand het heeft geschreven.</div>
+        </div>
+        <div class="sc-layers">
+          <span class="sc-layer-bar amber"></span>
+          <span class="sc-layer-bar amber"></span>
+          <span class="sc-layer-bar blue"></span>
+          <span class="sc-layer-bar green"></span>
+          <span class="sc-layer-bar green"></span>
+          <span class="sc-layer-bar purple"></span>
+        </div>
+      </button>
+
+      <button class="scenario-card" data-goto="scene-04">
+        <div class="sc-number">04</div>
+        <div>
+          <div class="sc-title">De programma-manager overziet</div>
+          <div class="sc-desc">Hoe afwijkingen vroeg worden gezien, en wie welk signaal krijgt.</div>
+        </div>
+        <div class="sc-layers">
+          <span class="sc-layer-bar"></span>
+          <span class="sc-layer-bar amber"></span>
+          <span class="sc-layer-bar"></span>
+          <span class="sc-layer-bar green"></span>
+          <span class="sc-layer-bar green"></span>
+          <span class="sc-layer-bar purple"></span>
+        </div>
+      </button>
+
+      <button class="scenario-card" data-goto="scene-05">
+        <div class="sc-number">05</div>
+        <div>
+          <div class="sc-title">Vijf mensen. EÃ©n programma.</div>
+          <div class="sc-desc">De symfonie â€” alle stakeholders tegelijk, alle lagen tegelijk actief.</div>
+        </div>
+        <div class="sc-layers">
+          <span class="sc-layer-bar amber"></span>
+          <span class="sc-layer-bar amber"></span>
+          <span class="sc-layer-bar blue"></span>
+          <span class="sc-layer-bar green"></span>
+          <span class="sc-layer-bar green"></span>
+          <span class="sc-layer-bar purple"></span>
+        </div>
+      </button>
+
+      <div class="scenario-card placeholder">
+        <div class="placeholder-text">e-office Â· intern<br>voor Jasper, april 2026</div>
+      </div>
+    </div>
+
+    <div class="hub-footer">Dit is wat we bouwen. Dit is waarom het werkt.</div>
+  </div>
+
+  <!-- ============================================================
+       SCENE 01 â€” Slordige prompt Â· Slimme skill
+  ============================================================ -->
+  <div id="scene-01" class="scene">
+    <div class="scene-chrome">
+      <button class="back-btn" data-goto="hub">â† Terug naar hub</button>
+      <div class="scene-title">01 â€” Slordige prompt Â· Slimme skill</div>
+      <div class="scene-controls">
+        <span class="step-indicator" id="s01-step">stap 0 / 4</span>
+        <button class="ctrl-btn" data-action="prev">â† Vorige</button>
+        <button class="ctrl-btn" data-action="pause">Pauze</button>
+        <button class="ctrl-btn" data-action="replay">Herspeel</button>
+        <button class="ctrl-btn primary" data-action="next">Volgende â†’</button>
+      </div>
+    </div>
+
+    <div class="scene-body split-50-50">
+      <div class="s01-panel left">
+        <div class="s01-header">
+          <div class="s01-label">Zonder skills</div>
+          <div class="s01-badge cool">generiek</div>
+        </div>
+        <div class="s01-components" id="s01-left-components">
+          <div class="skill-component" style="visibility: hidden;"></div>
+          <div class="skill-component" style="visibility: hidden;"></div>
+          <div class="skill-component" style="visibility: hidden;"></div>
+          <div class="skill-component" style="visibility: hidden;"></div>
+        </div>
+        <div class="s01-prompt-wrap">
+          <div class="s01-prompt-label">prompt</div>
+          <div class="s01-prompt" id="s01-left-prompt"></div>
+        </div>
+        <div class="s01-receives" id="s01-left-receives">Model ontvangt: 19 woorden.</div>
+        <div class="s01-response-wrap">
+          <div>
+            <div class="s01-response-label">antwoord van het model</div>
+            <div class="s01-response" id="s01-left-response"></div>
+          </div>
+          <div class="s01-verdict warn" id="s01-left-verdict">
+            âš  Risico â€” generiek, mogelijk hallucinatie, geen organisatiecontext.
+          </div>
+        </div>
+      </div>
+
+      <div class="s01-panel right">
+        <div class="s01-header">
+          <div class="s01-label">Met skills</div>
+          <div class="s01-badge warm">skill-gedreven</div>
+        </div>
+        <div class="s01-components" id="s01-right-components">
+          <div class="skill-component" data-sc="1">
+            <div class="sc-head">CONTEXT</div>
+            <div class="sc-body">Dossier, historie, lopend protocol. Welke feiten gelden nu?</div>
+          </div>
+          <div class="skill-component" data-sc="2">
+            <div class="sc-head">PERSPECTIEF</div>
+            <div class="sc-body">Medewerker corporatie, verantwoordelijk voor complex Roosendaal.</div>
+          </div>
+          <div class="skill-component" data-sc="3">
+            <div class="sc-head">GRENZEN</div>
+            <div class="sc-body">Geen juridisch advies. Geen besluit zonder regiomanager.</div>
+          </div>
+          <div class="skill-component" data-sc="4">
+            <div class="sc-head">WERKWIJZE</div>
+            <div class="sc-body">Huurincasso-protocol. Stap volgt op stap. Schuldhulp vÃ³Ã³r juridisch.</div>
+          </div>
+        </div>
+        <div class="s01-prompt-wrap">
+          <div class="s01-prompt-label">prompt</div>
+          <div class="s01-prompt" id="s01-right-prompt"></div>
+        </div>
+        <div class="s01-receives" id="s01-right-receives">Model ontvangt: prompt + 4 skill-componenten.</div>
+        <div class="s01-response-wrap">
+          <div>
+            <div class="s01-response-label">antwoord van het model</div>
+            <div class="s01-response" id="s01-right-response"></div>
+          </div>
+          <div class="s01-verdict good" id="s01-right-verdict">
+            âœ“ Grounded in skill-context, geen hallucinatie, direct actionable.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="s01-closer" id="s01-closer">Het model is hetzelfde. De input is anders.</div>
+
+    <!-- Layer panel below -->
+    <div style="margin-top: 28px;">
+      <div class="layer-panel" id="s01-layer-panel"></div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SCENE 02 â€” Ed, maandagochtend
+  ============================================================ -->
+  <div id="scene-02" class="scene">
+    <div class="scene-chrome">
+      <button class="back-btn" data-goto="hub">â† Terug naar hub</button>
+      <div class="scene-title">02 â€” Ed, maandagochtend 9 uur</div>
+      <div class="scene-controls">
+        <span class="step-indicator" id="s02-step">stap 0 / 4</span>
+        <button class="ctrl-btn" data-action="prev">â† Vorige</button>
+        <button class="ctrl-btn" data-action="pause">Pauze</button>
+        <button class="ctrl-btn" data-action="replay">Herspeel</button>
+        <button class="ctrl-btn primary" data-action="next">Volgende â†’</button>
+      </div>
+    </div>
+
+    <div class="scene-body split-60-40">
+      <div>
+        <div class="ed-hero" id="s02-hero">
+          <div><span class="ed-hero-icon"></span>Maandag 9:00. Ed opent zijn laptop.</div>
+        </div>
+
+        <div class="dashboard" id="s02-dashboard" style="display:none;">
+          <div class="dash-header">
+            <div>
+              <div class="dash-greet">Goedemorgen Ed â€” <em>Contoso Â· AutoDesk-agent</em></div>
+              <div class="dash-sub">Jouw focus vandaag Â· 3 actiepunten</div>
+            </div>
+            <div class="dash-time">
+              <div>Maandag</div>
+              <div class="time-val">09:02</div>
+            </div>
+          </div>
+          <div class="dash-grid">
+            <div class="dash-card green" data-ed-card="1">
+              <div class="dc-header">
+                <div class="dc-tag">Vandaag</div>
+                <div class="dc-time">10:00 â€” 45 min</div>
+              </div>
+              <div class="dc-body">Review met Jon over SharePoint-koppeling AutoDesk-data. Agenda-item open in Teams.</div>
+              <a class="dc-action">Open dossier â†—</a>
+            </div>
+            <div class="dash-card amber" data-ed-card="2">
+              <div class="dc-header">
+                <div class="dc-tag">Wachtende actie</div>
+                <div class="dc-time">deadline woensdag</div>
+              </div>
+              <div class="dc-body">Esther wacht op jouw input voor use case #14. Concept klaargezet in SharePoint.</div>
+              <a class="dc-action">Bekijk concept â†—</a>
+            </div>
+            <div class="dash-card red" data-ed-card="3">
+              <div class="dc-header">
+                <div class="dc-tag">Signaal</div>
+                <div class="dc-time">afgelopen weekend</div>
+              </div>
+              <div class="dc-body">AutoDesk-agent gaf 3Ã— een afwijkend antwoord. GeÃ«scaleerd naar jou voor review â€” voorstel: skill-update nodig.</div>
+              <a class="dc-action">Review signalen â†—</a>
+            </div>
+            <div class="dash-card context" data-ed-card="4">
+              <div class="dc-header">
+                <div class="dc-tag">Context</div>
+                <div class="dc-time">vrijdag 16:00</div>
+              </div>
+              <div class="dc-body">Chris (Contoso) verwacht vrijdag rapportage. Jouw bijdrage: status AutoDesk-integratie. Concept wordt automatisch aangemaakt op donderdag.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="s02-closer" id="s02-closer">
+          Ed heeft niets gevraagd. De agent wist wie hij was, waar hij gisteren stopte, wat er op hem wacht, en wat prioriteit heeft. <em>Dat is geen magie. Dat is architectuur.</em>
+        </div>
+      </div>
+
+      <div>
+        <div class="layer-panel" id="s02-layer-panel"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SCENE 03 â€” Chris, vrijdag 16 uur
+  ============================================================ -->
+  <div id="scene-03" class="scene">
+    <div class="scene-chrome">
+      <button class="back-btn" data-goto="hub">â† Terug naar hub</button>
+      <div class="scene-title">03 â€” Chris, vrijdag 16 uur</div>
+      <div class="scene-controls">
+        <span class="step-indicator" id="s03-step">stap 0 / 4</span>
+        <button class="ctrl-btn" data-action="prev">â† Vorige</button>
+        <button class="ctrl-btn" data-action="pause">Pauze</button>
+        <button class="ctrl-btn" data-action="replay">Herspeel</button>
+        <button class="ctrl-btn primary" data-action="next">Volgende â†’</button>
+      </div>
+    </div>
+
+    <div class="scene-body split-60-40">
+      <div>
+        <div class="ed-hero" id="s03-hero">
+          <div><span class="ed-hero-icon" style="background: var(--blue);"></span>Vrijdag 16:00. Chris opent zijn e-mail.</div>
+        </div>
+
+        <div class="motd-envelope" id="s03-motd" style="display:none;">
+          <div class="motd-mail-bar">
+            <span>Inbox Â· Chris van der Meer</span>
+            <span>vr 16:02</span>
+          </div>
+          <div class="motd-body">
+            <div class="motd-header">
+              <div class="motd-title">Contoso Â· Weekrapport week 16 Â· van e-office</div>
+              <div class="motd-sub">Conform MOTD-structuur Â· Ã©Ã©n besluit gevraagd</div>
+            </div>
+
+            <div class="motd-block" data-motd-block="1">
+              <div class="motd-block-label">Mens</div>
+              <div class="motd-block-body">Jeroen twijfelde deze week aan projectmanagement-waarde. Interventie voltooid â€” vertrouwen hersteld via demonstratie accorderingsproces. Servicemanagers zijn nu volledig aangehaakt.</div>
+            </div>
+
+            <div class="motd-block" data-motd-block="2">
+              <div class="motd-block-label">Organisatie</div>
+              <div class="motd-block-body">22 ondernemingen verdeeld over 4 servicemanagers. Use case pipeline: 6 geaccordeerd Â· 3 in review Â· 2 nieuw ingediend. Accorderingsproces loopt conform workflow.</div>
+            </div>
+
+            <div class="motd-block" data-motd-block="3">
+              <div class="motd-block-label">Technologie</div>
+              <div class="motd-block-body">SharePoint-randvoorwaarden: 4 van 5 gereed. AutoDesk-agent: pilot draait, 3 afwijkingen deze week geÃ«scaleerd en opgelost. Copilot rollout: op schema.</div>
+            </div>
+
+            <div class="motd-block" data-motd-block="4">
+              <div class="motd-block-label">Data</div>
+              <div class="motd-block-body">Adoptiegraad week-over-week: +12%. Training-engagement: 78%. Microsoft funding-benutting: 41 van 162,5 uur ingezet.</div>
+            </div>
+
+            <div class="motd-decision" id="s03-decision">
+              <div class="motd-decision-label">Besluit gevraagd van Chris</div>
+              <div class="motd-decision-body">Keuze tussen use case A (generiek, heel Contoso) en use case B (specifiek, Ã©Ã©n onderneming) voor volgende funding-tranche. <strong>Advies e-office: A.</strong> Deadline: woensdag.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="s03-closer" id="s03-closer">
+          Niemand heeft dit rapport geschreven. Het ontstaat uit de skill-architectuur. De programma-manager valideert en tekent. <em>Chris krijgt elke vrijdag hetzelfde formaat, voorspelbaar, strategisch.</em>
+        </div>
+      </div>
+
+      <div>
+        <div class="layer-panel" id="s03-layer-panel"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SCENE 04 â€” De programma-manager overziet
+  ============================================================ -->
+  <div id="scene-04" class="scene">
+    <div class="scene-chrome">
+      <button class="back-btn" data-goto="hub">â† Terug naar hub</button>
+      <div class="scene-title">04 â€” De programma-manager overziet</div>
+      <div class="scene-controls">
+        <span class="step-indicator" id="s04-step">stap 0 / 5</span>
+        <button class="ctrl-btn" data-action="prev">â† Vorige</button>
+        <button class="ctrl-btn" data-action="pause">Pauze</button>
+        <button class="ctrl-btn" data-action="replay">Herspeel</button>
+        <button class="ctrl-btn primary" data-action="next">Volgende â†’</button>
+      </div>
+    </div>
+
+    <div class="scene-body split-60-40">
+      <div>
+        <div class="mission-control">
+          <div class="mc-header">
+            <div>
+              <div class="mc-title">Programma-overzicht Â· Contoso</div>
+              <div class="mc-status" id="s04-status">Maandag 08:45 â€” alles op koers.</div>
+            </div>
+            <div class="mc-clock" id="s04-clock">08:45</div>
+          </div>
+
+          <div class="mc-grid">
+            <div class="mc-quadrant green" data-mc-q="tech">
+              <div class="mcq-head"><span class="mcq-dot"></span><span class="mcq-name">Techniek</span></div>
+              <div class="mcq-activity">AutoDesk-integratie draait Â· rollout M365 op schema Â· 22 ondernemingen gekoppeld.</div>
+              <div class="mcq-footer">
+                <div class="mcq-beslis">Beslismomenten Â· <span class="val">0</span></div>
+                <div class="mcq-time">08:30</div>
+              </div>
+            </div>
+            <div class="mc-quadrant green" data-mc-q="data">
+              <div class="mcq-head"><span class="mcq-dot"></span><span class="mcq-name">Data</span></div>
+              <div class="mcq-activity">Dashboards vernieuwd Â· funding-benutting binnen norm Â· Power BI conform governance.</div>
+              <div class="mcq-footer">
+                <div class="mcq-beslis">Beslismomenten Â· <span class="val">0</span></div>
+                <div class="mcq-time">07:58</div>
+              </div>
+            </div>
+            <div class="mc-quadrant green" data-mc-q="adoptie">
+              <div class="mcq-head"><span class="mcq-dot"></span><span class="mcq-name">Adoptie</span></div>
+              <div class="mcq-activity" id="s04-adoptie-act">Training-engagement 78% Â· adoptie week-over-week +12% Â· geen afwijkingen.</div>
+              <div class="mcq-footer">
+                <div class="mcq-beslis">Beslismomenten Â· <span class="val">0</span></div>
+                <div class="mcq-time">08:12</div>
+              </div>
+            </div>
+            <div class="mc-quadrant green" data-mc-q="change">
+              <div class="mcq-head"><span class="mcq-dot"></span><span class="mcq-name">Change</span></div>
+              <div class="mcq-activity">Servicemanagers volledig aangehaakt Â· interventie Jeroen succesvol afgerond.</div>
+              <div class="mcq-footer">
+                <div class="mcq-beslis">Beslismomenten Â· <span class="val">0</span></div>
+                <div class="mcq-time">08:40</div>
+              </div>
+            </div>
+            <div class="mc-quadrant green" data-mc-q="security">
+              <div class="mcq-head"><span class="mcq-dot"></span><span class="mcq-name">Security</span></div>
+              <div class="mcq-activity">Conform AVG Art. 25 Â· geen incidenten Â· toegangsrechten actueel.</div>
+              <div class="mcq-footer">
+                <div class="mcq-beslis">Beslismomenten Â· <span class="val">0</span></div>
+                <div class="mcq-time">08:04</div>
+              </div>
+            </div>
+            <div class="mc-quadrant green" data-mc-q="governance">
+              <div class="mcq-head"><span class="mcq-dot"></span><span class="mcq-name">Governance</span></div>
+              <div class="mcq-activity" id="s04-gov-act">Use case pipeline helder Â· accordering binnen SLA Â· beslismomenten in agenda.</div>
+              <div class="mcq-footer">
+                <div class="mcq-beslis">Beslismomenten Â· <span class="val">0</span></div>
+                <div class="mcq-time">08:22</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mc-proposal" id="s04-proposal-1">
+            <div class="mc-proposal-label">Voorstel regie-agent</div>
+            <div class="mc-proposal-body">Marjan 30 min bellen met contactpersoon Servaas. Agenda-gat om 15:00 â€” regie-agent heeft het gesprek voorbereid met talking points.</div>
+          </div>
+
+          <div class="mc-proposal" id="s04-proposal-2" style="margin-top: 8px; border-left-color: var(--red);">
+            <div class="mc-proposal-label" style="color: var(--red);">Escalatie regie-agent</div>
+            <div class="mc-proposal-body">Robbert geÃ¯nformeerd over use case #18 (accordering 7 dagen). Escalatie voorbereid voor Jochem â€” dossier klaar in Teams, kort besluit volstaat.</div>
+          </div>
+        </div>
+
+        <div class="s04-closer" id="s04-closer">
+          De programma-manager hoeft niets te checken. Hij wordt gevraagd te beslissen â€” alleen waar dat nodig is. <em>Alles wat groen staat, draait vanzelf. Alles wat amber of rood wordt, komt naar hem toe met een voorstel.</em>
+        </div>
+      </div>
+
+      <div>
+        <div class="layer-panel" id="s04-layer-panel"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SCENE 05 â€” Vijf mensen. EÃ©n programma.
+  ============================================================ -->
+  <div id="scene-05" class="scene">
+    <div class="scene-chrome">
+      <button class="back-btn" data-goto="hub">â† Terug naar hub</button>
+      <div class="scene-title">05 â€” Vijf mensen. EÃ©n programma.</div>
+      <div class="scene-controls">
+        <span class="step-indicator" id="s05-step">stap 0 / 5</span>
+        <button class="ctrl-btn" data-action="prev">â† Vorige</button>
+        <button class="ctrl-btn" data-action="pause">Pauze</button>
+        <button class="ctrl-btn" data-action="replay">Herspeel</button>
+        <button class="ctrl-btn primary" data-action="next">Volgende â†’</button>
+      </div>
+    </div>
+
+    <div class="scene-body stacked">
+      <div class="symphony-hero" id="s05-hero">Zes mensen openen hun werkdag. EÃ©n architectuur orkestreert.</div>
+
+      <div class="stakeholder-row" id="s05-row">
+        <div class="stakeholder eoffice" data-sh="ed">
+          <div class="sh-avatar">E</div>
+          <div class="sh-name">Ed</div>
+          <div class="sh-role">Tech Â· AutoDesk</div>
+          <div class="sh-view">Review 10:00 Â· 2 actiepunten</div>
+        </div>
+        <div class="stakeholder eoffice" data-sh="esther">
+          <div class="sh-avatar">Es</div>
+          <div class="sh-name">Esther</div>
+          <div class="sh-role">Use cases</div>
+          <div class="sh-view">Use case #14 concept Â· 3 reacties nodig</div>
+        </div>
+        <div class="stakeholder eoffice" data-sh="marjan">
+          <div class="sh-avatar">M</div>
+          <div class="sh-name">Marjan</div>
+          <div class="sh-role">Adoptie</div>
+          <div class="sh-view">Servaas-gesprek 15:00 Â· talking points klaar</div>
+        </div>
+        <div class="stakeholder eoffice" data-sh="robbert">
+          <div class="sh-avatar">R</div>
+          <div class="sh-name">Robbert</div>
+          <div class="sh-role">Funding Â· commercie</div>
+          <div class="sh-view">Funding-benutting op schema Â· volgende tranche</div>
+        </div>
+        <div class="stakeholder eoffice" data-sh="jochem">
+          <div class="sh-avatar">J</div>
+          <div class="sh-name">Jochem</div>
+          <div class="sh-role">Programma-management</div>
+          <div class="sh-view">2 beslismomenten Â· 1 escalatie</div>
+        </div>
+        <div class="stakeholder klant" data-sh="chris">
+          <div class="sh-avatar">C</div>
+          <div class="sh-name">Chris</div>
+          <div class="sh-role">Klant Â· Contoso</div>
+          <div class="sh-view">Weekrapport Â· 1 besluit gevraagd</div>
+        </div>
+      </div>
+
+      <div class="layer-panel" id="s05-layer-panel"></div>
+
+      <div class="symphony-closer" id="s05-closer">
+        <div class="symphony-headline">Zes mensen. EÃ©n programma. EÃ©n architectuur.</div>
+        <div class="symphony-sub">
+          Lagen 1 en 2 zijn van e-office. Altijd. Elke klant.<br>
+          Laag 3 bouwen we per klant. Lagen 4 tot 6 activeren we met onze methodiek en Microsoft-tools.<br>
+          Dit is waarom we herhaalbaar worden.
+        </div>
+        <div style="margin-top: 28px;">
+          <button class="ctrl-btn" data-goto="hub">â† Terug naar hub</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   STATE
+============================================================ */
+const state = {
+  currentScene: 'hub',
+  currentStep: 0,
+  autoPlayTimers: [],
+  isPaused: false,
+};
+
+/* ============================================================
+   ZESLAAGS-PANEEL â€” rendering
+============================================================ */
+const LAYER_DEFS = [
+  { num: '01', name: 'Programma super-skill', class: 'eoffice', defaultContent: 'Fundament e-office Â· ritme Â· werkwijze' },
+  { num: '02', name: 'Discipline-skills', class: 'eoffice', defaultContent: 'Techniek Â· Data Â· Adoptie Â· Change Â· Security Â· Governance' },
+  { num: '03', name: 'Klant-skills', class: 'klant', defaultContent: 'Sector Â· Organisatie Â· Stakeholders Â· Historie' },
+  { num: '04', name: 'Regie-agent', class: 'regie', defaultContent: 'Orkestreert en prioriteert' },
+  { num: '05', name: 'Discipline-agents', class: 'regie', defaultContent: 'Voeren per discipline uit' },
+  { num: '06', name: 'MCP-laag', class: 'mcp', defaultContent: 'Graph Â· Planner Â· Teams Â· SharePoint Â· Power Platform' },
+];
+
+function renderLayerPanel(targetId, label) {
+  const container = document.getElementById(targetId);
+  if (!container) return;
+  const header = `
+    <div class="layer-panel-header">
+      <div class="layer-panel-title">${label}</div>
+      <div class="layer-panel-meta">zeslaags-architectuur</div>
+    </div>
+  `;
+  const layers = LAYER_DEFS.map((l, idx) => `
+    <div class="layer ${l.class}" data-layer="${idx + 1}">
+      <div class="layer-num">L${l.num}</div>
+      <div class="layer-name">
+        <span>${l.name}</span>
+        <span class="pulse-dot"></span>
+      </div>
+      <div class="layer-content" data-default="${l.defaultContent}">${l.defaultContent}</div>
+    </div>
+  `).join('');
+  container.innerHTML = header + layers;
+}
+
+function setLayerActive(panelId, layerNum, content) {
+  const panel = document.getElementById(panelId);
+  if (!panel) return;
+  const layer = panel.querySelector(`[data-layer="${layerNum}"]`);
+  if (!layer) return;
+  layer.classList.add('active');
+  if (content) {
+    layer.querySelector('.layer-content').textContent = content;
+  }
+  // Re-trigger pulse animation
+  const dot = layer.querySelector('.pulse-dot');
+  if (dot) {
+    dot.style.animation = 'none';
+    void dot.offsetHeight;
+    dot.style.animation = '';
+  }
+}
+
+function resetLayerPanel(panelId) {
+  const panel = document.getElementById(panelId);
+  if (!panel) return;
+  panel.querySelectorAll('.layer').forEach(l => {
+    l.classList.remove('active');
+    const content = l.querySelector('.layer-content');
+    content.textContent = content.dataset.default;
+  });
+}
+
+/* ============================================================
+   SCENE ROUTING
+============================================================ */
+function goToScene(sceneId) {
+  clearAutoPlay();
+  document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById(sceneId);
+  if (target) target.classList.add('active');
+  state.currentScene = sceneId;
+  state.currentStep = 0;
+  state.isPaused = false;
+  window.location.hash = sceneId === 'hub' ? '' : sceneId;
+  // Reset state and init scene
+  initScene(sceneId);
+}
+
+function initScene(sceneId) {
+  if (sceneId === 'hub') return;
+  const n = sceneId.split('-')[1];
+  const panelId = `s${n}-layer-panel`;
+  const labels = {
+    '01': 'Actieve lagen Â· scenario 01',
+    '02': 'Actieve lagen Â· maandagochtend',
+    '03': 'Actieve lagen Â· vrijdagrapportage',
+    '04': 'Actieve lagen Â· regie in uitvoering',
+    '05': 'Actieve lagen Â· volledige orkestratie',
+  };
+  renderLayerPanel(panelId, labels[n]);
+  resetSceneState(sceneId);
+  // Auto-play after 800ms
+  scheduleTimer(() => playScene(sceneId), 800);
+}
+
+function resetSceneState(sceneId) {
+  if (sceneId === 'scene-01') resetS01();
+  else if (sceneId === 'scene-02') resetS02();
+  else if (sceneId === 'scene-03') resetS03();
+  else if (sceneId === 'scene-04') resetS04();
+  else if (sceneId === 'scene-05') resetS05();
+  updateStepIndicator();
+}
+
+function playScene(sceneId) {
+  if (sceneId === 'scene-01') playS01();
+  else if (sceneId === 'scene-02') playS02();
+  else if (sceneId === 'scene-03') playS03();
+  else if (sceneId === 'scene-04') playS04();
+  else if (sceneId === 'scene-05') playS05();
+}
+
+/* ============================================================
+   TIMER HELPERS
+============================================================ */
+function scheduleTimer(fn, delay) {
+  if (state.isPaused) return;
+  const id = setTimeout(() => {
+    if (!state.isPaused) fn();
+  }, delay);
+  state.autoPlayTimers.push(id);
+  return id;
+}
+
+function clearAutoPlay() {
+  state.autoPlayTimers.forEach(id => clearTimeout(id));
+  state.autoPlayTimers = [];
+}
+
+function pauseScene() {
+  state.isPaused = !state.isPaused;
+  const btns = document.querySelectorAll(`#${state.currentScene} [data-action="pause"]`);
+  btns.forEach(b => b.textContent = state.isPaused ? 'Hervat' : 'Pauze');
+  if (state.isPaused) {
+    clearAutoPlay();
+  } else {
+    // Resume from current step
+    playScene(state.currentScene);
+  }
+}
+
+function replayScene() {
+  clearAutoPlay();
+  resetSceneState(state.currentScene);
+  state.isPaused = false;
+  scheduleTimer(() => playScene(state.currentScene), 300);
+}
+
+/* ============================================================
+   STEP INDICATOR
+============================================================ */
+const STEP_COUNTS = { 'scene-01': 4, 'scene-02': 4, 'scene-03': 4, 'scene-04': 5, 'scene-05': 5 };
+
+function updateStepIndicator() {
+  const count = STEP_COUNTS[state.currentScene];
+  if (!count) return;
+  const n = state.currentScene.split('-')[1];
+  const el = document.getElementById(`s${n}-step`);
+  if (el) el.textContent = `stap ${state.currentStep} / ${count}`;
+  const nextBtn = document.querySelector(`#${state.currentScene} [data-action="next"]`);
+  const prevBtn = document.querySelector(`#${state.currentScene} [data-action="prev"]`);
+  if (nextBtn) nextBtn.disabled = state.currentStep >= count;
+  if (prevBtn) prevBtn.disabled = state.currentStep <= 0;
+}
+
+function nextStep() {
+  clearAutoPlay();
+  state.isPaused = true;
+  const count = STEP_COUNTS[state.currentScene];
+  if (state.currentStep < count) {
+    state.currentStep++;
+    runStep(state.currentScene, state.currentStep);
+    updateStepIndicator();
+  }
+}
+
+function prevStep() {
+  clearAutoPlay();
+  state.isPaused = true;
+  if (state.currentStep > 0) {
+    state.currentStep--;
+    // Rewind: easiest is reset + replay steps
+    resetSceneState(state.currentScene);
+    for (let i = 1; i <= state.currentStep; i++) {
+      runStep(state.currentScene, i, true);
+    }
+    updateStepIndicator();
+  }
+}
+
+function runStep(sceneId, step, instant = false) {
+  if (sceneId === 'scene-01') runS01Step(step, instant);
+  else if (sceneId === 'scene-02') runS02Step(step, instant);
+  else if (sceneId === 'scene-03') runS03Step(step, instant);
+  else if (sceneId === 'scene-04') runS04Step(step, instant);
+  else if (sceneId === 'scene-05') runS05Step(step, instant);
+}
+
+/* ============================================================
+   TYPEWRITER UTIL
+============================================================ */
+function typeWriter(el, text, speed = 40, done) {
+  let i = 0;
+  el.textContent = '';
+  function tick() {
+    if (i < text.length) {
+      el.textContent = text.slice(0, i + 1);
+      i++;
+      scheduleTimer(tick, speed);
+    } else if (done) {
+      done();
+    }
+  }
+  tick();
+}
+
+/* ============================================================
+   SCENE 01 LOGIC
+============================================================ */
+const S01_PROMPT = 'Huurder Roosendaal betaalt niet, wat doen?';
+const S01_LEFT_ANSWER = 'U kunt een incassobureau inschakelen of een betalingsregeling aanbieden. Het is aan te raden juridisch advies in te winnen.';
+const S01_RIGHT_ANSWER = 'Dit is complex Roosendaal, dossier 247. We zitten bij stap 3 van het huurincasso-protocol (aanmaning verstuurd 12 april). Voor stap 4 is akkoord van Petra (regiomanager) nodig. Signalen van meervoudige schulden â€” verwijzing naar gemeentelijke schuldhulp overwegen vÃ³Ã³r juridische stap.';
+
+function resetS01() {
+  document.getElementById('s01-left-prompt').textContent = '';
+  document.getElementById('s01-right-prompt').textContent = '';
+  document.getElementById('s01-left-response').textContent = '';
+  document.getElementById('s01-right-response').textContent = '';
+  document.getElementById('s01-left-response').classList.remove('visible');
+  document.getElementById('s01-right-response').classList.remove('visible');
+  document.getElementById('s01-left-verdict').classList.remove('visible');
+  document.getElementById('s01-right-verdict').classList.remove('visible');
+  document.getElementById('s01-left-receives').classList.remove('visible');
+  document.getElementById('s01-right-receives').classList.remove('visible');
+  document.getElementById('s01-closer').classList.remove('visible');
+  document.querySelectorAll('#s01-right-components .skill-component').forEach(c => c.classList.remove('visible'));
+  resetLayerPanel('s01-layer-panel');
+  state.currentStep = 0;
+}
+
+function playS01() {
+  runS01Step(1);
+  scheduleTimer(() => runS01Step(2), 3200);
+  scheduleTimer(() => runS01Step(3), 5600);
+  scheduleTimer(() => runS01Step(4), 11500);
+}
+
+function runS01Step(step, instant = false) {
+  state.currentStep = Math.max(state.currentStep, step);
+  if (step === 1) {
+    // The prompt appears in both panels
+    if (instant) {
+      document.getElementById('s01-left-prompt').textContent = S01_PROMPT;
+      document.getElementById('s01-right-prompt').textContent = S01_PROMPT;
+    } else {
+      typeWriter(document.getElementById('s01-left-prompt'), S01_PROMPT, 40);
+      typeWriter(document.getElementById('s01-right-prompt'), S01_PROMPT, 40);
+    }
+  }
+  if (step === 2) {
+    // Left: just "model receives: 19 woorden"
+    document.getElementById('s01-left-receives').classList.add('visible');
+    // Right: components appear staggered
+    const comps = document.querySelectorAll('#s01-right-components .skill-component');
+    comps.forEach((c, i) => {
+      if (instant) c.classList.add('visible');
+      else scheduleTimer(() => c.classList.add('visible'), i * 180);
+    });
+    scheduleTimer(() => document.getElementById('s01-right-receives').classList.add('visible'), instant ? 0 : 900);
+  }
+  if (step === 3) {
+    // Responses appear (left first, right slightly later)
+    document.getElementById('s01-left-response').classList.add('visible');
+    if (instant) {
+      document.getElementById('s01-left-response').textContent = S01_LEFT_ANSWER;
+      document.getElementById('s01-right-response').textContent = S01_RIGHT_ANSWER;
+      document.getElementById('s01-right-response').classList.add('visible');
+      document.getElementById('s01-left-verdict').classList.add('visible');
+      document.getElementById('s01-right-verdict').classList.add('visible');
+    } else {
+      typeWriter(document.getElementById('s01-left-response'), S01_LEFT_ANSWER, 18, () => {
+        document.getElementById('s01-left-verdict').classList.add('visible');
+      });
+      scheduleTimer(() => {
+        document.getElementById('s01-right-response').classList.add('visible');
+        typeWriter(document.getElementById('s01-right-response'), S01_RIGHT_ANSWER, 15, () => {
+          document.getElementById('s01-right-verdict').classList.add('visible');
+        });
+      }, 800);
+    }
+  }
+  if (step === 4) {
+    // Activate layers
+    setLayerActive('s01-layer-panel', 2, 'Governance-skill Â· huurincasso-protocol');
+    scheduleTimer(() => setLayerActive('s01-layer-panel', 3, 'Klant-skill Â· Woningcorporatie Roosendaal Â· Petra als regiomanager'), instant ? 0 : 300);
+    scheduleTimer(() => setLayerActive('s01-layer-panel', 6, 'SharePoint Â· dossier 247 Â· lopend protocol'), instant ? 0 : 600);
+    scheduleTimer(() => document.getElementById('s01-closer').classList.add('visible'), instant ? 0 : 1400);
+  }
+  updateStepIndicator();
+}
+
+/* ============================================================
+   SCENE 02 LOGIC
+============================================================ */
+function resetS02() {
+  const hero = document.getElementById('s02-hero');
+  hero.classList.remove('visible', 'faded');
+  const dash = document.getElementById('s02-dashboard');
+  dash.style.display = 'none';
+  document.querySelectorAll('#s02-dashboard [data-ed-card]').forEach(c => c.classList.remove('visible'));
+  document.getElementById('s02-closer').classList.remove('visible');
+  resetLayerPanel('s02-layer-panel');
+  state.currentStep = 0;
+}
+
+function playS02() {
+  runS02Step(1);
+  scheduleTimer(() => runS02Step(2), 1800);
+  scheduleTimer(() => runS02Step(3), 5200);
+  scheduleTimer(() => runS02Step(4), 9200);
+}
+
+function runS02Step(step, instant = false) {
+  state.currentStep = Math.max(state.currentStep, step);
+  if (step === 1) {
+    document.getElementById('s02-hero').classList.add('visible');
+  }
+  if (step === 2) {
+    // Hero fades, dashboard appears
+    const hero = document.getElementById('s02-hero');
+    hero.classList.add('faded');
+    const dash = document.getElementById('s02-dashboard');
+    dash.style.display = 'block';
+    // Stagger cards
+    const cards = document.querySelectorAll('#s02-dashboard [data-ed-card]');
+    cards.forEach((c, i) => {
+      if (instant) c.classList.add('visible');
+      else scheduleTimer(() => c.classList.add('visible'), 300 + i * 400);
+    });
+    // Staggered layer activation in parallel with dashboard
+    if (!instant) {
+      scheduleTimer(() => setLayerActive('s02-layer-panel', 6, 'Graph API Â· agenda Â· Teams Â· SharePoint Â· Planner'), 500);
+      scheduleTimer(() => setLayerActive('s02-layer-panel', 3, 'Contoso-skill Â· AutoDesk-context Â· 22 ondernemingen'), 900);
+      scheduleTimer(() => setLayerActive('s02-layer-panel', 2, 'Tech-skill Â· AutoDesk-integratie-patronen'), 1300);
+      scheduleTimer(() => setLayerActive('s02-layer-panel', 1, 'Programma-skill Â· dagelijks ritme Â· focus per medewerker'), 1700);
+      scheduleTimer(() => setLayerActive('s02-layer-panel', 5, 'Tech-agent Â· bundelt input uit skill-laag'), 2100);
+      scheduleTimer(() => setLayerActive('s02-layer-panel', 4, 'Regie-agent Â· orkestreert en prioriteert Ed\'s dag'), 2500);
+    } else {
+      setLayerActive('s02-layer-panel', 6, 'Graph API Â· agenda Â· Teams Â· SharePoint Â· Planner');
+      setLayerActive('s02-layer-panel', 3, 'Contoso-skill Â· AutoDesk-context Â· 22 ondernemingen');
+      setLayerActive('s02-layer-panel', 2, 'Tech-skill Â· AutoDesk-integratie-patronen');
+      setLayerActive('s02-layer-panel', 1, 'Programma-skill Â· dagelijks ritme Â· focus per medewerker');
+      setLayerActive('s02-layer-panel', 5, 'Tech-agent Â· bundelt input uit skill-laag');
+      setLayerActive('s02-layer-panel', 4, 'Regie-agent Â· orkestreert en prioriteert Ed\'s dag');
+    }
+  }
+  if (step === 3) {
+    // All layers should be active now â€” ensure it
+    [1, 2, 3, 5, 4, 6].forEach(n => {
+      setLayerActive('s02-layer-panel', n);
+    });
+  }
+  if (step === 4) {
+    document.getElementById('s02-closer').classList.add('visible');
+  }
+  updateStepIndicator();
+}
+
+/* ============================================================
+   SCENE 03 LOGIC
+============================================================ */
+function resetS03() {
+  const hero = document.getElementById('s03-hero');
+  hero.classList.remove('visible', 'faded');
+  document.getElementById('s03-motd').style.display = 'none';
+  document.querySelectorAll('#s03-motd [data-motd-block]').forEach(b => b.classList.remove('visible'));
+  document.getElementById('s03-decision').classList.remove('visible');
+  document.getElementById('s03-closer').classList.remove('visible');
+  resetLayerPanel('s03-layer-panel');
+  state.currentStep = 0;
+}
+
+function playS03() {
+  runS03Step(1);
+  scheduleTimer(() => runS03Step(2), 1800);
+  scheduleTimer(() => runS03Step(3), 6500);
+  scheduleTimer(() => runS03Step(4), 11000);
+}
+
+function runS03Step(step, instant = false) {
+  state.currentStep = Math.max(state.currentStep, step);
+  if (step === 1) {
+    document.getElementById('s03-hero').classList.add('visible');
+  }
+  if (step === 2) {
+    document.getElementById('s03-hero').classList.add('faded');
+    document.getElementById('s03-motd').style.display = 'block';
+    const blocks = document.querySelectorAll('#s03-motd [data-motd-block]');
+    blocks.forEach((b, i) => {
+      if (instant) b.classList.add('visible');
+      else scheduleTimer(() => b.classList.add('visible'), 300 + i * 600);
+    });
+    scheduleTimer(() => document.getElementById('s03-decision').classList.add('visible'), instant ? 0 : 3000);
+  }
+  if (step === 3) {
+    // Layer activation â€” different sequence than scene 02
+    const seq = [
+      [1, 'Programma-super-skill Â· MOTD-ritme Â· wekelijkse rapportage'],
+      [4, 'Regie-agent Â· synthese van 5 discipline-agents'],
+      [5, 'Discipline-agents Â· elk leverde input (tech, data, adoptie, change, security, governance)'],
+      [6, 'Data uit Planner, SharePoint, Power BI, Outlook'],
+      [3, 'Klant-skill Â· Contoso-stakeholders Â· Chris\' voorkeur: beknopt en beslissingsgericht'],
+      [2, 'Discipline-skills Â· ondersteunend aan regie'],
+    ];
+    seq.forEach(([n, content], i) => {
+      if (instant) setLayerActive('s03-layer-panel', n, content);
+      else scheduleTimer(() => setLayerActive('s03-layer-panel', n, content), i * 500);
+    });
+  }
+  if (step === 4) {
+    document.getElementById('s03-closer').classList.add('visible');
+  }
+  updateStepIndicator();
+}
+
+/* ============================================================
+   SCENE 04 LOGIC
+============================================================ */
+const S04_CLOCK_TIMES = ['08:45', '11:20', '14:05', '15:40', '16:30'];
+
+function resetS04() {
+  document.querySelectorAll('#scene-04 .mc-quadrant').forEach(q => {
+    q.classList.remove('amber', 'red');
+    q.classList.add('green');
+    const beslis = q.querySelector('.mcq-beslis .val');
+    if (beslis) beslis.textContent = '0';
+  });
+  document.getElementById('s04-adoptie-act').textContent = 'Training-engagement 78% Â· adoptie week-over-week +12% Â· geen afwijkingen.';
+  document.getElementById('s04-gov-act').textContent = 'Use case pipeline helder Â· accordering binnen SLA Â· beslismomenten in agenda.';
+  document.getElementById('s04-status').textContent = 'Maandag 08:45 â€” alles op koers.';
+  document.getElementById('s04-clock').textContent = '08:45';
+  document.getElementById('s04-clock').classList.remove('highlight');
+  document.getElementById('s04-proposal-1').classList.remove('visible');
+  document.getElementById('s04-proposal-2').classList.remove('visible');
+  document.getElementById('s04-closer').classList.remove('visible');
+  resetLayerPanel('s04-layer-panel');
+  state.currentStep = 0;
+}
+
+function playS04() {
+  runS04Step(1);
+  scheduleTimer(() => runS04Step(2), 1400);
+  scheduleTimer(() => runS04Step(3), 5000);
+  scheduleTimer(() => runS04Step(4), 8500);
+  scheduleTimer(() => runS04Step(5), 12500);
+}
+
+function runS04Step(step, instant = false) {
+  state.currentStep = Math.max(state.currentStep, step);
+  if (step === 1) {
+    // Everything green â€” baseline (already reset)
+    document.getElementById('s04-status').textContent = 'Maandag 08:45 â€” alles op koers.';
+  }
+  if (step === 2) {
+    // Clock advances
+    const clock = document.getElementById('s04-clock');
+    if (instant) {
+      clock.textContent = '14:05';
+    } else {
+      S04_CLOCK_TIMES.slice(0, 3).forEach((t, i) => {
+        scheduleTimer(() => { clock.textContent = t; }, i * 800);
+      });
+    }
+  }
+  if (step === 3) {
+    // Adoptie goes amber
+    const q = document.querySelector('[data-mc-q="adoptie"]');
+    q.classList.remove('green');
+    q.classList.add('amber');
+    q.querySelector('.mcq-beslis .val').textContent = '1';
+    document.getElementById('s04-adoptie-act').textContent = 'Adoptiegraad bij onderneming Servaas stagneert Â· 3 dagen geen verbetering.';
+    document.getElementById('s04-status').textContent = 'Eerste afwijking gedetecteerd â€” regie-agent actief.';
+    document.getElementById('s04-clock').textContent = '15:40';
+    document.getElementById('s04-clock').classList.add('highlight');
+    scheduleTimer(() => document.getElementById('s04-proposal-1').classList.add('visible'), instant ? 0 : 600);
+    // Activate regie layers
+    setLayerActive('s04-layer-panel', 4, 'Regie-agent Â· detecteert afwijking Â· bereidt voorstel voor');
+    setLayerActive('s04-layer-panel', 5, 'Adoptie-agent signaleert stagnatie Servaas');
+    setLayerActive('s04-layer-panel', 6, 'Data uit Planner Â· agenda-gat 15:00 gevonden');
+  }
+  if (step === 4) {
+    // Governance goes red
+    const q = document.querySelector('[data-mc-q="governance"]');
+    q.classList.remove('green');
+    q.classList.add('red');
+    q.querySelector('.mcq-beslis .val').textContent = '1';
+    document.getElementById('s04-gov-act').textContent = 'Use case #18 wacht 7 dagen op accordering â€” overschrijdt SLA.';
+    document.getElementById('s04-status').textContent = 'Escalatie: Ã©Ã©n rood signaal, voorstel gereed voor Jochem.';
+    document.getElementById('s04-clock').textContent = '16:30';
+    scheduleTimer(() => document.getElementById('s04-proposal-2').classList.add('visible'), instant ? 0 : 400);
+    setLayerActive('s04-layer-panel', 2, 'Governance-skill Â· SLA-bewaking Â· accordering-workflow');
+    setLayerActive('s04-layer-panel', 3, 'Klant-skill Â· Contoso-stakeholders Â· Jochem als escalatie-eigenaar');
+  }
+  if (step === 5) {
+    document.getElementById('s04-closer').classList.add('visible');
+  }
+  updateStepIndicator();
+}
+
+/* ============================================================
+   SCENE 05 LOGIC
+============================================================ */
+function resetS05() {
+  document.getElementById('s05-hero').classList.remove('visible');
+  document.querySelectorAll('#s05-row .stakeholder').forEach(s => s.classList.remove('visible', 'syncpulse'));
+  document.querySelectorAll('#s05-layer-panel .layer').forEach(l => l.classList.remove('syncpulse'));
+  document.getElementById('s05-closer').classList.remove('visible');
+  resetLayerPanel('s05-layer-panel');
+  state.currentStep = 0;
+}
+
+function playS05() {
+  runS05Step(1);
+  scheduleTimer(() => runS05Step(2), 1000);
+  scheduleTimer(() => runS05Step(3), 5500);
+  scheduleTimer(() => runS05Step(4), 9500);
+  scheduleTimer(() => runS05Step(5), 11500);
+}
+
+function runS05Step(step, instant = false) {
+  state.currentStep = Math.max(state.currentStep, step);
+  if (step === 1) {
+    document.getElementById('s05-hero').classList.add('visible');
+  }
+  if (step === 2) {
+    // Stakeholders appear one by one
+    const order = ['ed', 'esther', 'marjan', 'robbert', 'jochem', 'chris'];
+    order.forEach((sh, i) => {
+      const el = document.querySelector(`[data-sh="${sh}"]`);
+      if (instant) el.classList.add('visible');
+      else scheduleTimer(() => el.classList.add('visible'), i * 600);
+    });
+  }
+  if (step === 3) {
+    // Layers light up bottom-to-top
+    const seq = [
+      [6, 'Graph Â· Planner Â· Teams Â· SharePoint Â· Power Platform'],
+      [5, 'Alle discipline-agents actief Â· parallel'],
+      [4, 'Regie-agent orkestreert Â· synchroniseert zes werkstromen'],
+      [3, 'Contoso-skill Â· klantspecifieke context per stakeholder'],
+      [2, 'Zes discipline-skills Â· e-office fundament'],
+      [1, 'Programma-super-skill Â· de sluitsteen'],
+    ];
+    seq.forEach(([n, content], i) => {
+      if (instant) setLayerActive('s05-layer-panel', n, content);
+      else scheduleTimer(() => setLayerActive('s05-layer-panel', n, content), i * 500);
+    });
+  }
+  if (step === 4) {
+    // Sync pulse
+    if (!instant) {
+      document.querySelectorAll('#s05-row .stakeholder').forEach(s => s.classList.add('syncpulse'));
+      document.querySelectorAll('#s05-layer-panel .layer.active').forEach(l => l.classList.add('syncpulse'));
+    }
+  }
+  if (step === 5) {
+    document.getElementById('s05-closer').classList.add('visible');
+  }
+  updateStepIndicator();
+}
+
+/* ============================================================
+   EVENT WIRING
+============================================================ */
+document.addEventListener('click', (e) => {
+  const goto = e.target.closest('[data-goto]');
+  if (goto) {
+    goToScene(goto.dataset.goto);
+    return;
+  }
+  const action = e.target.closest('[data-action]');
+  if (action) {
+    const act = action.dataset.action;
+    if (act === 'next') nextStep();
+    else if (act === 'prev') prevStep();
+    else if (act === 'pause') pauseScene();
+    else if (act === 'replay') replayScene();
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') {
+    if (state.currentScene !== 'hub') nextStep();
+  } else if (e.key === 'ArrowLeft') {
+    if (state.currentScene !== 'hub') prevStep();
+  } else if (e.key === 'Escape') {
+    goToScene('hub');
+  } else if (e.key === ' ') {
+    if (state.currentScene !== 'hub') {
+      e.preventDefault();
+      pauseScene();
+    }
+  }
+});
+
+/* ============================================================
+   HASH ROUTING
+============================================================ */
+function applyHash() {
+  const hash = window.location.hash.slice(1);
+  if (hash && document.getElementById(hash)) {
+    goToScene(hash);
+  } else {
+    goToScene('hub');
+  }
+}
+window.addEventListener('hashchange', applyHash);
+
+/* ============================================================
+   INIT
+============================================================ */
+applyHash();
+</script>
+
+</body>
+</html>
+
