@@ -12,30 +12,35 @@
    DESIGN TOKENS
 ============================================================ */
 :root {
-  --bg: #0a0a0f;
-  --bg-grad: radial-gradient(ellipse at top, #12121a 0%, #0a0a0f 50%);
-  --surface-1: #14141c;
-  --surface-2: #1a1a24;
-  --surface-3: #22222e;
-  --border: #2a2a36;
-  --border-subtle: #1f1f2a;
-  --text: #e5e7eb;
-  --text-2: #9ca3af;
+  --bg: #fafaf7;
+  --bg-card: #ffffff;
+  --bg-grad: #fafaf7;
+  --surface-1: #ffffff;
+  --surface-2: #f6f5f0;
+  --surface-3: #efede6;
+  --border: rgba(0, 0, 0, 0.15);
+  --border-strong: rgba(0, 0, 0, 0.15);
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+  --text: #1a1a1a;
+  --text-muted: #6b7280;
+  --text-2: #4b5563;
   --text-3: #6b7280;
-  --amber: #f59e0b;
-  --amber-dim: #b8720a;
-  --amber-glow: rgba(245, 158, 11, 0.2);
-  --blue: #3b82f6;
-  --blue-dim: #1e40af;
-  --blue-glow: rgba(59, 130, 246, 0.2);
-  --green: #10b981;
+  --amber: #d97706;
+  --amber-dim: #b45309;
+  --amber-glow: rgba(217, 119, 6, 0.18);
+  --blue: #2563eb;
+  --blue-dim: #1d4ed8;
+  --blue-glow: rgba(37, 99, 235, 0.18);
+  --green: #059669;
   --green-dim: #047857;
-  --green-glow: rgba(16, 185, 129, 0.2);
-  --purple: #a78bfa;
+  --green-glow: rgba(5, 150, 105, 0.18);
+  --purple: #7c3aed;
   --purple-dim: #6d28d9;
-  --purple-glow: rgba(167, 139, 250, 0.2);
-  --red: #ef4444;
-  --red-glow: rgba(239, 68, 68, 0.2);
+  --purple-glow: rgba(124, 58, 237, 0.18);
+  --red: #dc2626;
+  --red-glow: rgba(220, 38, 38, 0.18);
   --t-fast: 200ms ease-out;
   --t-med: 400ms ease-out;
   --t-slow: 600ms ease-out;
@@ -145,7 +150,7 @@ button {
 }
 
 .scenario-card {
-  background: var(--surface-1);
+  background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
   padding: 32px 28px;
@@ -157,11 +162,13 @@ button {
   cursor: pointer;
   position: relative;
   text-align: left;
+  box-shadow: var(--shadow);
 }
 .scenario-card:hover {
   transform: translateY(-2px);
   border-color: var(--amber);
-  background: var(--surface-2);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-lg);
 }
 .scenario-card:hover .sc-number { color: var(--amber); }
 
@@ -289,11 +296,11 @@ button {
 }
 .ctrl-btn.primary {
   background: var(--amber);
-  color: #1a1300;
+  color: #ffffff;
   border-color: var(--amber);
   font-weight: 500;
 }
-.ctrl-btn.primary:hover:not(:disabled) { background: #fab534; border-color: #fab534; color: #1a1300; }
+.ctrl-btn.primary:hover:not(:disabled) { background: var(--amber-dim); border-color: var(--amber-dim); color: #ffffff; }
 
 .step-indicator {
   font-size: 12px;
@@ -318,11 +325,12 @@ button {
    ZESLAAGS PANEEL (het anker)
 ============================================================ */
 .layer-panel {
-  background: var(--surface-1);
+  background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
   padding: 20px 20px 16px;
   position: relative;
+  box-shadow: var(--shadow);
 }
 .layer-panel-header {
   display: flex;
@@ -349,25 +357,18 @@ button {
 
 .layer {
   position: relative;
-  padding: 10px 14px 10px 20px;
-  margin-bottom: 4px;
+  padding: 10px 14px 10px 14px;
+  margin-bottom: 6px;
   border-radius: 6px;
   background: var(--surface-2);
-  border-left: 3px solid transparent;
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--border);
+  box-shadow: var(--shadow);
   transition: all var(--t-med);
-  opacity: 0.45;
+  opacity: 0.7;
 }
 .layer:last-child { margin-bottom: 0; }
 
-.layer-num {
-  position: absolute;
-  left: 6px;
-  top: 11px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9px;
-  color: var(--text-3);
-  letter-spacing: 0.05em;
-}
 .layer-name {
   font-size: 11px;
   font-weight: 500;
@@ -388,37 +389,33 @@ button {
   transition: color var(--t-med);
 }
 
-.layer.eoffice {
-  border-left-color: var(--amber-dim);
-  opacity: 0.55;
-}
-.layer.klant {
-  border-left-color: var(--blue-dim);
-  opacity: 0.55;
-}
+.layer.eoffice { border-left-color: var(--amber); opacity: 0.75; }
+.layer.klant   { border-left-color: var(--blue);  opacity: 0.75; }
+.layer.regie   { border-left-color: var(--green); opacity: 0.75; }
+.layer.mcp     { border-left-color: var(--purple); opacity: 0.75; }
 
 .layer.active {
   opacity: 1;
-  background: var(--surface-3);
+  background: var(--bg-card);
 }
 .layer.active .layer-name { color: var(--text); }
 .layer.active .layer-content { color: var(--text-2); }
 
 .layer.active.eoffice {
   border-left-color: var(--amber);
-  box-shadow: inset 0 0 20px -10px var(--amber-glow), 0 0 0 1px var(--amber-glow);
+  box-shadow: var(--shadow), 0 0 0 1px var(--amber-glow);
 }
 .layer.active.klant {
   border-left-color: var(--blue);
-  box-shadow: inset 0 0 20px -10px var(--blue-glow), 0 0 0 1px var(--blue-glow);
+  box-shadow: var(--shadow), 0 0 0 1px var(--blue-glow);
 }
 .layer.active.regie {
   border-left-color: var(--green);
-  box-shadow: inset 0 0 20px -10px var(--green-glow), 0 0 0 1px var(--green-glow);
+  box-shadow: var(--shadow), 0 0 0 1px var(--green-glow);
 }
 .layer.active.mcp {
   border-left-color: var(--purple);
-  box-shadow: inset 0 0 20px -10px var(--purple-glow), 0 0 0 1px var(--purple-glow);
+  box-shadow: var(--shadow), 0 0 0 1px var(--purple-glow);
 }
 
 /* Pulse dot */
@@ -462,7 +459,7 @@ button {
    SCENE 01 â€” Slordige prompt
 ============================================================ */
 .s01-panel {
-  background: var(--surface-1);
+  background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
   padding: 28px;
@@ -470,9 +467,10 @@ button {
   display: flex;
   flex-direction: column;
   transition: all var(--t-slow);
+  box-shadow: var(--shadow);
 }
 .s01-panel.left { border-color: var(--border-subtle); }
-.s01-panel.right { border-color: rgba(245, 158, 11, 0.15); }
+.s01-panel.right { border-color: rgba(217, 119, 6, 0.25); }
 
 .s01-header {
   display: flex;
@@ -535,8 +533,8 @@ button {
 }
 
 .s01-prompt-wrap {
-  background: #0f0f16;
-  border: 1px solid var(--border);
+  background: #f3f4f6;
+  border: 1px solid var(--border-subtle);
   border-radius: 6px;
   padding: 14px 16px;
   margin-bottom: 14px;
@@ -624,9 +622,10 @@ button {
    SCENE 02 â€” Ed's dashboard
 ============================================================ */
 .ed-hero {
-  background: var(--surface-1);
+  background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
+  box-shadow: var(--shadow);
   padding: 32px;
   text-align: center;
   margin-bottom: 20px;
@@ -657,10 +656,11 @@ button {
 }
 
 .dashboard {
-  background: var(--surface-1);
+  background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
   padding: 24px 28px 28px;
+  box-shadow: var(--shadow);
 }
 .dash-header {
   display: flex;
@@ -773,10 +773,11 @@ button {
    SCENE 03 â€” Chris' rapport
 ============================================================ */
 .motd-envelope {
-  background: var(--surface-1);
+  background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
   overflow: hidden;
+  box-shadow: var(--shadow);
 }
 .motd-mail-bar {
   background: var(--surface-2);
@@ -882,10 +883,11 @@ button {
    SCENE 04 â€” Mission control
 ============================================================ */
 .mission-control {
-  background: var(--surface-1);
+  background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
   padding: 22px 24px 24px;
+  box-shadow: var(--shadow);
 }
 .mc-header {
   display: flex;
@@ -1068,7 +1070,7 @@ button {
 }
 
 .stakeholder {
-  background: var(--surface-1);
+  background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: 6px;
   padding: 14px 12px;
@@ -1079,6 +1081,7 @@ button {
   transform: translateY(6px);
   transition: all var(--t-slower);
   position: relative;
+  box-shadow: var(--shadow);
 }
 .stakeholder.visible { opacity: 1; transform: translateY(0); }
 
@@ -1168,6 +1171,26 @@ button {
 .flow-line.green { stroke: var(--green); }
 .flow-line.blue { stroke: var(--blue); }
 
+/* Stakeholder â†’ laag verbindingen (scene 05) + generieke scene-overlay lijnen */
+.s05-stake-lines,
+.scene-overlay-lines {
+  position: absolute;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 3;
+}
+.stake-line {
+  fill: none;
+  stroke-width: 2;
+  opacity: 0;
+  transition: opacity 600ms ease-out;
+}
+.stake-line.visible { opacity: 0.5; animation: pulse-line 2.5s ease-in-out infinite; }
+.stake-line.subtle.visible { opacity: 0.5; animation: pulse-line-subtle 3s ease-in-out infinite; }
+.stake-line.active.visible { opacity: 0.55; animation: pulse-line-active 2s ease-in-out infinite; }
+.scene-body { position: relative; }
+
 /* ============================================================
    Pulse sync (scene 05)
 ============================================================ */
@@ -1193,22 +1216,22 @@ button {
   animation: pulse-line 2.5s ease-in-out infinite;
 }
 @keyframes pulse-line {
-  0%, 100% { opacity: 0.35; }
-  50% { opacity: 0.9; }
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1.0; }
 }
 .conn-line.pulsing.subtle {
   animation: pulse-line-subtle 3s ease-in-out infinite;
 }
 @keyframes pulse-line-subtle {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.7; }
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1.0; }
 }
 .conn-line.pulsing.active {
   animation: pulse-line-active 2s ease-in-out infinite;
 }
 @keyframes pulse-line-active {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.95; }
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1.0; }
 }
 .conn-line.pulsing.stagger-1 { animation-delay: 0s; }
 .conn-line.pulsing.stagger-2 { animation-delay: 0.3s; }
@@ -1240,12 +1263,19 @@ button {
 .s06-intro.visible { opacity: 1; }
 
 .s06-clock {
+  display: block;
   text-align: center;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 14px;
-  color: var(--text-3);
+  font-size: 16px;
+  color: var(--text-2);
   letter-spacing: 0.08em;
-  margin-bottom: 16px;
+  max-width: 140px;
+  margin: 0 auto 20px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-card);
+  box-shadow: var(--shadow);
   transition: color var(--t-fast);
 }
 
@@ -1261,12 +1291,13 @@ button {
 
 /* Chat paneel (links) */
 .s06-chat {
-  background: var(--surface-1);
+  background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
   padding: 20px;
   display: flex;
   flex-direction: column;
+  box-shadow: var(--shadow);
 }
 .s06-chat-header {
   font-family: 'JetBrains Mono', monospace;
@@ -1350,33 +1381,53 @@ button {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  overflow-y: auto;
-  max-height: 650px;
 }
 .s06-step {
-  background: var(--surface-1);
+  background: #f5f4ef;
   border: 1px solid var(--border-subtle);
   border-radius: 6px;
   padding: 12px 14px;
-  opacity: 0.25;
-  transform: scale(0.98);
+  opacity: 0.6;
+  transform: none;
   transition: all 500ms ease-out;
-  border-left: 3px solid transparent;
+  border-left: 3px solid var(--border);
+  box-shadow: var(--shadow);
 }
+.s06-step .s06-step-title,
+.s06-step .s06-step-sub,
+.s06-step .s06-step-body,
+.s06-step .s06-step-num,
+.s06-step .s06-step-micro { color: var(--text-3); }
 .s06-step.active {
   opacity: 1;
-  transform: scale(1);
-  background: var(--surface-2);
+  transform: scale(1.01);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-lg);
 }
+.s06-step.active .s06-step-title { color: var(--text); }
+.s06-step.active .s06-step-sub { color: var(--text-2); }
+.s06-step.active .s06-step-body { color: var(--text-2); }
+.s06-step.active .s06-step-num { color: var(--text-3); }
 .s06-step.done {
-  opacity: 0.5;
-  transform: scale(0.98);
+  opacity: 1;
+  transform: none;
+  background: #fbfaf7;
+  box-shadow: var(--shadow);
 }
+.s06-step.done .s06-step-title { color: var(--text); }
+.s06-step.done .s06-step-sub,
+.s06-step.done .s06-step-body { color: var(--text-2); }
+.s06-step.done .s06-step-num { color: var(--text-3); }
 .s06-step.active.amber-step { border-left-color: var(--amber); }
-.s06-step.active.red-step { border-left-color: var(--red); }
-.s06-step.active.blue-step { border-left-color: var(--blue); }
+.s06-step.active.red-step   { border-left-color: var(--red); }
+.s06-step.active.blue-step  { border-left-color: var(--blue); }
 .s06-step.active.green-step { border-left-color: var(--green); }
 .s06-step.active.purple-step { border-left-color: var(--purple); }
+.s06-step.done.amber-step  { border-left-color: rgba(217, 119, 6, 0.55); }
+.s06-step.done.red-step    { border-left-color: rgba(220, 38, 38, 0.55); }
+.s06-step.done.blue-step   { border-left-color: rgba(37, 99, 235, 0.55); }
+.s06-step.done.green-step  { border-left-color: rgba(5, 150, 105, 0.55); }
+.s06-step.done.purple-step { border-left-color: rgba(124, 58, 237, 0.55); }
 .s06-step-num {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
@@ -1471,7 +1522,8 @@ button {
   opacity: 0;
   transition: opacity 1200ms ease-out;
   z-index: 20;
-  background: rgba(10, 10, 15, 0.85);
+  background: rgba(250, 250, 247, 0.95);
+  backdrop-filter: blur(4px);
   padding: 40px;
   pointer-events: none;
 }
@@ -1513,7 +1565,7 @@ button {
   z-index: 2;
 }
 .conn-line {
-  stroke-width: 1.5;
+  stroke-width: 2;
   fill: none;
   opacity: 0;
   transition: opacity 500ms ease-out;
@@ -2192,7 +2244,6 @@ function renderLayerPanel(targetId, label) {
   `;
   const layers = LAYER_DEFS.map((l, idx) => `
     <div class="layer ${l.class}" data-layer="${idx + 1}">
-      <div class="layer-num">L${l.num}</div>
       <div class="layer-name">
         <span>${l.name}</span>
         <span class="pulse-dot"></span>
@@ -2206,7 +2257,7 @@ function renderLayerPanel(targetId, label) {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.classList.add('panel-connections');
     svg.setAttribute('preserveAspectRatio', 'none');
-    const colors = ['#f59e0b', '#f59e0b', '#3b82f6', '#10b981', '#10b981', '#a78bfa'];
+    const colors = ['#d97706', '#d97706', '#2563eb', '#059669', '#059669', '#7c3aed'];
     for (let i = 0; i < 5; i++) {
       const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
       line.classList.add('conn-line');
@@ -2552,6 +2603,7 @@ function resetS02() {
   document.querySelectorAll('#s02-dashboard [data-ed-card]').forEach(c => c.classList.remove('visible'));
   document.getElementById('s02-closer').classList.remove('visible');
   resetLayerPanel('s02-layer-panel');
+  clearSceneLines('s02-overlay-svg');
   state.currentStep = 0;
 }
 
@@ -2606,6 +2658,8 @@ function runS02Step(step, instant = false) {
   }
   if (step === 4) {
     document.getElementById('s02-closer').classList.add('visible');
+    // Dashboard-kaart â†’ laag verbindingen (architectuur zichtbaar)
+    scheduleTimer(() => drawS02DashboardLines(), instant ? 0 : 300);
   }
   updateStepIndicator();
 }
@@ -2621,6 +2675,7 @@ function resetS03() {
   document.getElementById('s03-decision').classList.remove('visible');
   document.getElementById('s03-closer').classList.remove('visible');
   resetLayerPanel('s03-layer-panel');
+  clearSceneLines('s03-overlay-svg');
   state.currentStep = 0;
 }
 
@@ -2666,6 +2721,8 @@ function runS03Step(step, instant = false) {
   }
   if (step === 4) {
     document.getElementById('s03-closer').classList.add('visible');
+    // MOTD-blok â†’ laag verbindingen (architectuur zichtbaar)
+    scheduleTimer(() => drawS03MOTDLines(), instant ? 0 : 300);
   }
   updateStepIndicator();
 }
@@ -2691,6 +2748,7 @@ function resetS04() {
   document.getElementById('s04-proposal-2').classList.remove('visible');
   document.getElementById('s04-closer').classList.remove('visible');
   resetLayerPanel('s04-layer-panel');
+  clearSceneLines('s04-overlay-svg');
   state.currentStep = 0;
 }
 
@@ -2736,6 +2794,8 @@ function runS04Step(step, instant = false) {
     setLayerActive('s04-layer-panel', 6, 'Data uit Planner Â· agenda-gat 15:00 gevonden');
     // Actieve pulse op data-stromen MCPâ†’agents (laag 5â†’6, 4â†’5): 2s, 0.4â†’0.95
     showSpecificConnLines('s04-layer-panel', [4, 5], 'active');
+    // Kwadrant â†’ laag verbindingen (adoptie amber â†’ L5)
+    scheduleTimer(() => drawS04QuadrantLines(), instant ? 0 : 800);
   }
   if (step === 4) {
     // Governance goes red
@@ -2751,6 +2811,8 @@ function runS04Step(step, instant = false) {
     setLayerActive('s04-layer-panel', 3, 'Klant-skill Â· Contoso-stakeholders Â· Jochem als escalatie-eigenaar');
     // Extra verbindingslijnen voor governance-pad
     showSpecificConnLines('s04-layer-panel', [1, 2, 3], 'active');
+    // Kwadrant â†’ laag verbindingen opnieuw (governance rood â†’ L4 nu erbij)
+    scheduleTimer(() => drawS04QuadrantLines(), instant ? 0 : 600);
   }
   if (step === 5) {
     document.getElementById('s04-closer').classList.add('visible');
@@ -2767,7 +2829,169 @@ function resetS05() {
   document.querySelectorAll('#s05-layer-panel .layer').forEach(l => l.classList.remove('syncpulse'));
   document.getElementById('s05-closer').classList.remove('visible');
   resetLayerPanel('s05-layer-panel');
+  clearS05StakeholderLines();
   state.currentStep = 0;
+}
+
+function clearS05StakeholderLines() {
+  const svg = document.getElementById('s05-stake-svg');
+  if (svg) svg.remove();
+}
+
+function drawS05StakeholderLines() {
+  clearS05StakeholderLines();
+  const scene = document.getElementById('scene-05');
+  const body = scene.querySelector('.scene-body');
+  const panel = document.getElementById('s05-layer-panel');
+  if (!body || !panel) return;
+  const bodyRect = body.getBoundingClientRect();
+  const COLOR = { amber: '#d97706', blue: '#2563eb', green: '#059669' };
+  const MAP = {
+    ed:      { layer: 2, color: COLOR.amber },
+    esther:  { layer: 2, color: COLOR.amber },
+    marjan:  { layer: 2, color: COLOR.amber },
+    robbert: { layer: 2, color: COLOR.amber },
+    jochem:  { layer: 1, color: COLOR.amber },
+    chris:   { layer: 3, color: COLOR.blue  },
+  };
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.id = 's05-stake-svg';
+  svg.classList.add('s05-stake-lines');
+  svg.setAttribute('viewBox', `0 0 ${bodyRect.width} ${bodyRect.height}`);
+  svg.setAttribute('preserveAspectRatio', 'none');
+  svg.style.width = bodyRect.width + 'px';
+  svg.style.height = bodyRect.height + 'px';
+  Object.entries(MAP).forEach(([sh, cfg], i) => {
+    const shEl = scene.querySelector(`[data-sh="${sh}"]`);
+    const layerEl = panel.querySelector(`.layer[data-layer="${cfg.layer}"]`);
+    if (!shEl || !layerEl) return;
+    const shRect = shEl.getBoundingClientRect();
+    const lRect = layerEl.getBoundingClientRect();
+    const x1 = shRect.left + shRect.width / 2 - bodyRect.left;
+    const y1 = shRect.bottom - bodyRect.top;
+    const x2 = lRect.left + 10 - bodyRect.left;
+    const y2 = lRect.top + lRect.height / 2 - bodyRect.top;
+    const midY = (y1 + y2) / 2;
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', `M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}`);
+    path.setAttribute('stroke', cfg.color);
+    path.classList.add('stake-line');
+    path.style.animationDelay = (i * 0.2) + 's';
+    svg.appendChild(path);
+    requestAnimationFrame(() => path.classList.add('visible'));
+  });
+  body.appendChild(svg);
+}
+
+/* ============================================================
+   GENERIEKE SCENE-OVERLAY LIJNEN (S02/S03/S04/S06)
+============================================================ */
+const LINE_COLOR = { amber: '#d97706', blue: '#2563eb', green: '#059669', red: '#dc2626', purple: '#7c3aed' };
+
+function clearSceneLines(svgId) {
+  const svg = document.getElementById(svgId);
+  if (svg) svg.remove();
+}
+
+/**
+ * Teken horizontale bezier-lijnen van een bronelement in het scene-body
+ * naar een .layer binnen een layer-panel. connections: [{fromEl, toPanelId, toLayer, color, pulse}]
+ * pulse: 'default' | 'subtle' | 'active'
+ */
+function drawSceneLines(sceneId, svgId, connections) {
+  clearSceneLines(svgId);
+  const scene = document.getElementById(sceneId);
+  if (!scene) return;
+  const body = scene.querySelector('.scene-body');
+  if (!body) return;
+  const bodyRect = body.getBoundingClientRect();
+  if (bodyRect.width === 0) return;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.id = svgId;
+  svg.classList.add('scene-overlay-lines');
+  svg.setAttribute('viewBox', `0 0 ${bodyRect.width} ${bodyRect.height}`);
+  svg.setAttribute('preserveAspectRatio', 'none');
+  svg.style.width = bodyRect.width + 'px';
+  svg.style.height = bodyRect.height + 'px';
+  connections.forEach((c, i) => {
+    const fromEl = c.fromEl;
+    const panel = document.getElementById(c.toPanelId);
+    if (!fromEl || !panel) return;
+    const toEl = panel.querySelector(`.layer[data-layer="${c.toLayer}"]`);
+    if (!toEl) return;
+    const fr = fromEl.getBoundingClientRect();
+    const tr = toEl.getBoundingClientRect();
+    const x1 = fr.right - bodyRect.left;
+    const y1 = fr.top + fr.height / 2 - bodyRect.top;
+    const x2 = tr.left + 10 - bodyRect.left;
+    const y2 = tr.top + tr.height / 2 - bodyRect.top;
+    const midX = (x1 + x2) / 2;
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', `M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`);
+    path.setAttribute('stroke', c.color);
+    path.classList.add('stake-line');
+    if (c.pulse === 'subtle') path.classList.add('subtle');
+    else if (c.pulse === 'active') path.classList.add('active');
+    path.style.animationDelay = (i * 0.15) + 's';
+    svg.appendChild(path);
+    requestAnimationFrame(() => path.classList.add('visible'));
+  });
+  body.appendChild(svg);
+}
+
+function drawS02DashboardLines() {
+  const scene = document.getElementById('scene-02');
+  const q = sel => scene.querySelector(sel);
+  drawSceneLines('scene-02', 's02-overlay-svg', [
+    { fromEl: q('[data-ed-card="1"]'), toPanelId: 's02-layer-panel', toLayer: 6, color: LINE_COLOR.purple, pulse: 'subtle' },
+    { fromEl: q('[data-ed-card="2"]'), toPanelId: 's02-layer-panel', toLayer: 2, color: LINE_COLOR.amber,  pulse: 'subtle' },
+    { fromEl: q('[data-ed-card="3"]'), toPanelId: 's02-layer-panel', toLayer: 5, color: LINE_COLOR.green,  pulse: 'subtle' },
+    { fromEl: q('[data-ed-card="4"]'), toPanelId: 's02-layer-panel', toLayer: 3, color: LINE_COLOR.blue,   pulse: 'subtle' },
+  ]);
+}
+
+function drawS03MOTDLines() {
+  const scene = document.getElementById('scene-03');
+  const q = sel => scene.querySelector(sel);
+  drawSceneLines('scene-03', 's03-overlay-svg', [
+    { fromEl: q('[data-motd-block="1"]'), toPanelId: 's03-layer-panel', toLayer: 3, color: LINE_COLOR.blue,   pulse: 'subtle' },
+    { fromEl: q('[data-motd-block="2"]'), toPanelId: 's03-layer-panel', toLayer: 1, color: LINE_COLOR.amber,  pulse: 'subtle' },
+    { fromEl: q('[data-motd-block="3"]'), toPanelId: 's03-layer-panel', toLayer: 6, color: LINE_COLOR.purple, pulse: 'subtle' },
+    { fromEl: q('[data-motd-block="4"]'), toPanelId: 's03-layer-panel', toLayer: 4, color: LINE_COLOR.green,  pulse: 'subtle' },
+  ]);
+}
+
+function drawS04QuadrantLines() {
+  const scene = document.getElementById('scene-04');
+  const q = sel => scene.querySelector(sel);
+  const lines = [];
+  const adoptie = q('[data-mc-q="adoptie"]');
+  const governance = q('[data-mc-q="governance"]');
+  if (adoptie && adoptie.classList.contains('amber')) {
+    lines.push({ fromEl: adoptie, toPanelId: 's04-layer-panel', toLayer: 5, color: LINE_COLOR.amber, pulse: 'active' });
+  }
+  if (governance && governance.classList.contains('red')) {
+    lines.push({ fromEl: governance, toPanelId: 's04-layer-panel', toLayer: 4, color: LINE_COLOR.red, pulse: 'active' });
+  }
+  // Overige actieve kwadranten subtle amber naar discipline-skill (L2)
+  ['tech', 'data', 'change', 'security'].forEach(qName => {
+    const el = q(`[data-mc-q="${qName}"]`);
+    if (el && !el.classList.contains('green')) {
+      lines.push({ fromEl: el, toPanelId: 's04-layer-panel', toLayer: 2, color: LINE_COLOR.amber, pulse: 'subtle' });
+    }
+  });
+  drawSceneLines('scene-04', 's04-overlay-svg', lines);
+}
+
+function drawS06ContextLines() {
+  const scene = document.getElementById('scene-06');
+  const step4 = scene.querySelector('[data-s06-step="4"]');
+  if (!step4) return;
+  // Twee amber lijnen: stap-4 kaart â†’ L6 (MCP: Graph/Planner) en â†’ L3 (Klant-skill: SharePoint-context)
+  drawSceneLines('scene-06', 's06-overlay-svg', [
+    { fromEl: step4, toPanelId: 's06-layer-panel', toLayer: 6, color: LINE_COLOR.amber, pulse: 'active' },
+    { fromEl: step4, toPanelId: 's06-layer-panel', toLayer: 3, color: LINE_COLOR.amber, pulse: 'active' },
+  ]);
 }
 
 function playS05() {
@@ -2815,6 +3039,8 @@ function runS05Step(step, instant = false) {
     }
     // Volledig pulserend netwerk â€” alle verbindingen met stagger (climax scenario 05)
     showConnLines('s05-layer-panel', 'full-stagger');
+    // Stakeholder â†’ laag verbindingen (ed/esther/marjan/robbert â†’ L2, jochem â†’ L1, chris â†’ L3)
+    drawS05StakeholderLines();
   }
   if (step === 5) {
     document.getElementById('s05-closer').classList.add('visible');
@@ -2853,19 +3079,21 @@ function resetS06() {
   // Remove all pulsing from layer panel connections
   showConnLines('s06-layer-panel', 'off');
   resetLayerPanel('s06-layer-panel');
+  clearSceneLines('s06-overlay-svg');
   state.currentStep = 0;
 }
 
 function playS06() {
-  // Timings doubled for readability (briefing says 2x is fine)
-  runS06Step(1);                           // Stap 0: intro
-  scheduleTimer(() => runS06Step(2), 2000); // Stap 1: identiteit
-  scheduleTimer(() => runS06Step(3), 3600); // Stap 2: grenzen
-  scheduleTimer(() => runS06Step(4), 5200); // Stap 3: skill-index
-  scheduleTimer(() => runS06Step(5), 6800); // Stap 4: context
-  scheduleTimer(() => runS06Step(6), 9600); // Stap 5: kiezen
-  scheduleTimer(() => runS06Step(7), 11200);// Stap 6: laden
-  scheduleTimer(() => runS06Step(8), 13000);// Stap 7: antwoord + reflectie
+  // Timings verdubbeld + 500ms leespauze tussen elke stap (briefing v2).
+  // Stap-durations: 1=1600, 2=1600, 3=2000, 4=3600 (context), 5=2000, 6=1600, climax=4000.
+  runS06Step(1);                             // Stap 0 setup (t=0)
+  scheduleTimer(() => runS06Step(2), 4000);   // Stap 1: identiteit
+  scheduleTimer(() => runS06Step(3), 6100);   // Stap 2: grenzen
+  scheduleTimer(() => runS06Step(4), 8200);   // Stap 3: skill-index
+  scheduleTimer(() => runS06Step(5), 10700);  // Stap 4: context ophalen (langst)
+  scheduleTimer(() => runS06Step(6), 14800);  // Stap 5: werkwijze kiezen
+  scheduleTimer(() => runS06Step(7), 17300);  // Stap 6: werkwijze laden
+  scheduleTimer(() => runS06Step(8), 19400);  // Stap 7: climax + antwoord
 }
 
 function s06ActivateStep(stepNum) {
@@ -2899,7 +3127,7 @@ function runS06Step(step, instant = false) {
       document.getElementById('s06-clock').textContent = '09:17:03';
     };
     if (instant) fn();
-    else scheduleTimer(fn, 1500);
+    else scheduleTimer(fn, 3000);
   }
 
   if (step === 2) {
@@ -2931,10 +3159,12 @@ function runS06Step(step, instant = false) {
     document.querySelectorAll('#s06-dots .s06-dot').forEach(d => d.classList.add('animated'));
     setLayerActive('s06-layer-panel', 3, 'Klant-skill \u00b7 WoCo Roosendaal \u00b7 Marieke = Hoofd Incasso');
     if (!instant) {
-      scheduleTimer(() => setLayerActive('s06-layer-panel', 6, 'Graph API \u00b7 SharePoint MCP \u00b7 Planner'), 400);
+      scheduleTimer(() => setLayerActive('s06-layer-panel', 6, 'Graph API \u00b7 SharePoint MCP \u00b7 Planner'), 800);
     } else {
       setLayerActive('s06-layer-panel', 6, 'Graph API \u00b7 SharePoint MCP \u00b7 Planner');
     }
+    // Stap-kaart â†’ L3/L6 verbindingen (Graph/SharePoint/Planner zichtbaar)
+    scheduleTimer(() => drawS06ContextLines(), instant ? 0 : 1400);
   }
 
   if (step === 6) {
@@ -2942,6 +3172,7 @@ function runS06Step(step, instant = false) {
     s06ActivateStep(5);
     document.getElementById('s06-clock').textContent = '09:17:06';
     document.querySelectorAll('#s06-dots .s06-dot').forEach(d => d.classList.remove('animated'));
+    clearSceneLines('s06-overlay-svg');
     setLayerActive('s06-layer-panel', 4, 'Regie-agent \u00b7 kiest haf-loop');
   }
 
